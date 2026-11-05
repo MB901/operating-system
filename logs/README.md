@@ -53,3 +53,9 @@ Device requires reencryption recovery. Run repair first.
 ```
 
 **Cause of the boot 3 failure:** after a power cut during `cryptsetup reencrypt --encrypt`, LUKS2 needs `cryptsetup repair` (with the key) before `cryptsetup reencrypt --resume-only`. The prototype skips the repair. The service is also started again and again by the units that need `/mnt/data` ("Start request repeated too quickly"). The fix (repair, then resume) is **not implemented or tested**. The data was not lost: 16 MiB encrypted, the rest still a plaintext linear segment, all of it described by the LUKS2 metadata.
+
+## Final runs after the fixes
+
+- `runs-mig10` (plain10 image): **`migrate` passed**, with a power cut 40 s into the conversion. Boot 3 logs "Repairing the interrupted reencryption" and "Conversion finished in 388s", and all post-conversion checks are in `migrate-boot3.serial.log`. The harness process died on a full disk during the final scan, so there is no `results.md`. The scan was redone by hand: 0 canary lines left in the partition. The key server of this run could not bind port 8444, because a server left over from a reproduction was serving the same test key.
+- `runs-wipe9` (https9 image, first image that really contains the LUKS-aware `haos-wipe`): **`wipe` passed**. `journalctl-all-boots-from-disk.txt` is the persistent journal read back from the wiped data partition. It includes the wipe boot: `Using /usr/sbin/blkid`, `Data partition type: crypto_LUKS`, `Erasing LUKS2 keyslots and header`.
+- Correction: the earlier `wipe` runs (`runs-b4`, `runs-7`, `repro/wipe-repro`) used the **stock** `haos-wipe`, because the harness did not copy the prototype's version into the test rootfs. Their "Data partition not found" comes from the stock script, not from a udev race.

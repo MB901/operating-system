@@ -1,0 +1,45 @@
+
+## Scenario wipe (haos.wipe=1 on an encrypted system)
+
+### boot 1 (encrypted), wipe requested
+```
+NAME          TYPE  FSTYPE      LABEL
+vda8          part  crypto_LUKS 
+`-hassos-data crypt ext4        hassos-data
+console=tty0 console=ttyS0 haos.data-crypt=1 haos.wipe=1
+```
+### boot 2 (console login at 148s)
+```
+console=tty0 console=ttyS0
+/dev/vda8: LABEL="hassos-data" UUID="db7ab951-adf7-4f52-aaa7-852ab49fde5a" BLOCK_SIZE="4096" TYPE="ext4" PARTLABEL="hassos-data" PARTUUID="a52a4597-fa3a-4851-aefd-2fbe9f849079"
+not-LUKS
+/dev/vda8
+ls: /mnt/overlay/etc/haos-data-crypt: No such file or directory
+mke2fs 1.47.2 (1-Jan-2025)
+Discarding device blocks:     0/98304           done
+Creating filesystem with 98304 1k blocks and 24576 inodes
+Filesystem UUID: a08a57cc-7270-4be6-90d4-a39e81a61915
+Superblock backups stored on blocks:
+	8193, 24577, 40961, 57345, 73729
+Allocating group tables:  0/12     done
+Writing inode tables:  0/12     done
+Creating journal (4096 blocks): done
+Writing superblocks and filesystem accounting information:  0/12     done
+[INFO] Removing wipe and data encryption flags from cmdline.txt
+Finished Home Assistant OS Device Wipe Service.
+0
+haos-apparmor.service          loaded failed failed HAOS AppArmor
+systemd-time-wait-sync.service loaded failed failed Wait Until Kernel Time Synchronized
+```
+### boot 3 (console login at 131s)
+```
+console=tty0 console=ttyS0
+/dev/vda8: LABEL="hassos-data" UUID="db7ab951-adf7-4f52-aaa7-852ab49fde5a" BLOCK_SIZE="4096" TYPE="ext4" PARTLABEL="hassos-data" PARTUUID="a52a4597-fa3a-4851-aefd-2fbe9f849079"
+not-LUKS
+/dev/vda8
+ls: /mnt/overlay/etc/haos-data-crypt: No such file or directory
+Home Assistant OS Device Wipe Service was skipped because of an unmet condition check (ConditionKernelCommandLine=haos.wipe=1).
+0
+haos-apparmor.service          loaded failed failed HAOS AppArmor
+systemd-time-wait-sync.service loaded failed failed Wait Until Kernel Time Synchronized
+```

@@ -1,0 +1,1 @@
+qemu-system-x86_64: -serial unix:/home/user/proto/runs-wipe9/wipe-boot3.serial,server=on,wait=on: info: QEMU waiting for connection on: disconnected:unix:/home/user/proto/runs-wipe9/wipe-boot3.serial,server=on

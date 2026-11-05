@@ -1,0 +1,19 @@
+Traceback (most recent call last):
+  File "/home/user/operating-system/Documentation/proposals/encrypted-data-partition-prototype/test-harness/key-server.py", line 121, in <module>
+    main()
+    ~~~~^^
+  File "/home/user/operating-system/Documentation/proposals/encrypted-data-partition-prototype/test-harness/key-server.py", line 114, in main
+    serve(a.serve, a.port, a.deny)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/operating-system/Documentation/proposals/encrypted-data-partition-prototype/test-harness/key-server.py", line 97, in serve
+    httpd = http.server.HTTPServer(("0.0.0.0", port), Handler)
+  File "/usr/local/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/http/server.py", line 140, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.13/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 98] Address already in use
