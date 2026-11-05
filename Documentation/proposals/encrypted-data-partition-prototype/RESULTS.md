@@ -12,7 +12,35 @@ All runs happened in QEMU VMs (TCG, no KVM, 4 vCPU, 2 GiB RAM, OVMF) on a cloud 
 
 ## Summary
 
-RESULTS_SUMMARY_PLACEHOLDER
+| # | Scenario | Result |
+|---|---|---|
+| 1 | Boot, HTTPS key available (`key-ok`) | **pass**: key fetched on attempt 1 about 20 s after boot, LUKS2 opened, `/mnt/data` mounted from `/dev/mapper/hassos-data`, persistent journal on it, Docker and Supervisor up, no ordering cycle |
+| 2 | First version without generator overrides | **fail, by design of the test**: systemd broke ordering cycles by deleting `systemd-resolved`, `auditd` and the unlock job. Root cause: `systemd-journal-flush.service` has `RequiresMountsFor=/var/log/journal` |
+| 3 | Tang reachable | **pass** (attempt 1) |
+| 4 | Tang down at boot, started 3 min later | **pass**: retries, unlocked on attempt 7, boot continues by itself |
+| 5 | Tang replaced by a server with other keys | **pass**: server answers 404 on `/rec/<kid>`, data stays locked |
+| 6 | Tang keys rotated (`tangd-rotate-keys`) | **pass**: old keys kept hidden, existing `key.jwe` still works |
+| 7 | 3 power cuts in a row while the key server is down | **problem**: `A_TRY` goes 1 → 2 → 3; the 4th boot (key server back) takes GRUB's **"Slot A (rescue shell)"** entry and stops in rescue mode (`sulogin`, "Press Enter for maintenance"). No console login within 15 min |
+| 8 | Console prompt while waiting | **pass after a fix**: first the console went silent, because `systemd-ask-password-wall.service` stops the console agent. With the wall agent ordered after the unlock, "Data partition is waiting for its network key. Recovery passphrase:" is shown on the console during every locked boot |
+| 9 | Recovery passphrase typed on the console | KEY_DENIED_PLACEHOLDER |
+| 10 | Supervisor data disk view | **mismatch confirmed**: udisks2 `Device` = `/dev/dm-0`, os-agent `CurrentDevice` = `/dev/mapper/hassos-data`. Supervisor compares these, so a false "multiple data disks" issue is expected; it could not be read back because Supervisor stays in `setup` without Internet |
+| 11 | Plain installation → in-place LUKS2 by HAOS (`migrate`) | MIGRATE_PLACEHOLDER |
+| 12 | `haos.wipe=1` on an encrypted system | WIPE_PLACEHOLDER |
+| 13 | Release 18.4 untouched vs prototype rootfs without the flag | COMPARE_PLACEHOLDER |
+| 14 | `haos-expand` on the encrypted partition | EXPAND_PLACEHOLDER |
+| 15 | Plaintext on the encrypted data partition | **pass** for the harness-converted image: 52 lines matching `hassio_supervisor\|containerd` in the original ext4, 0 in the LUKS2 partition |
+
+Sizes, measured with **Ubuntu 24.04 binaries** (not a measure of Buildroot packages):
+
+- `clevis` decrypt scripts, `jose`, `libjose`, `libjansson`: 322 860 bytes uncompressed;
+- GNU `bash` and `libtinfo` (clevis does not run on busybox ash): 1 654 352 bytes;
+- lzma erofs: about 200.4 MB without these, 201.3 MB with them plus `resize2fs` and its libraries.
+
+The test rootfs also needed, for test purposes only:
+
+- GNU bash for clevis;
+- Ubuntu `resize2fs` with its own e2fsprogs libraries (the HAOS `libext2fs` lacks `test_io_manager`, and `resize2fs` is not in the image);
+- out-of-tree `dm-crypt.ko`, `xts.ko` and `essiv.ko` (vermagic `6.18.58-haos SMP preempt mod_unload`).
 
 ## Details
 

@@ -148,7 +148,10 @@ Comparison. **This is a choice for maintainers, not a recommendation.**
 - Everything that needs `/mnt/data` waits, including Supervisor and both consoles (section 3). The console shows systemd's "A start job is running … (no limit)".
 - The unlock script asks for the recovery passphrase on the console through the systemd password agent (`systemd-ask-password`, while the network attempts continue) [T]. The prompt is just there, so a keyboard is never required. Whoever succeeds first wins, and the prompt disappears.
   - Pitfall found in the VM: upstream `systemd-ask-password-wall.service` runs `systemctl stop systemd-ask-password-console.path …` as soon as user sessions are allowed, because systemd assumes a getty is up by then. On HAOS the gettys wait for Supervisor, so the prompt vanished and the console went silent [T]. The generator orders the wall agent after the unlock.
-- **Boot counting**: while locked, Supervisor never marks the slot good, so GRUB's `A_TRY` keeps growing across reboots. See `RESULTS.md` (scenario `locked-reboots`) for what happens after three power cuts in a row. This is an open question (section 10).
+- **Boot counting, the main operational risk found**: while locked, Supervisor never marks the slot good, so GRUB's `A_TRY` grows on every boot. In the VM, three power cuts while the key server was down gave `A_TRY` 1 → 2 → 3. The fourth boot (key server back) took **"Slot A (rescue shell)"** and stopped at `sulogin` ("Press Enter for maintenance") [T]. On a fresh install `B_OK=0`, so GRUB has nothing to fall back to.
+  - For a headless box, a few power cuts while the router is down would leave it stuck until someone comes with a keyboard.
+  - In this offline VM even a successful boot leaves `A_TRY=1`, because Supervisor stays in `setup`. On a real install Supervisor marks good boots and resets the counter, but a locked boot never does.
+  - This is an open question (section 10).
 
 ## 7. Recovery and backup of the key
 
@@ -181,7 +184,10 @@ Comparison. **This is a choice for maintainers, not a recommendation.**
 1. Is an opt-in encrypted data partition acceptable in principle for generic-x86-64? Any objection to `CONFIG_DM_CRYPT` (+ XTS, AES-NI) in its kernel?
 2. Late unlock in the main system (generator, section 4.3) versus an initramfs: which is acceptable to maintain? The generator replaces or masks about ten units.
 3. Key source: HTTPS, Tang, both, or a generic "key command" hook (section 5)?
-4. **Boot counting while locked**: should waiting for the key count as a failed boot? Options: let GRUB fall back (current behaviour, see `RESULTS.md`); mark the slot good once the unlock succeeds; or stop counting while the unlock service is waiting.
+4. **Boot counting while locked** (observed: rescue shell after three locked boots): should waiting for the key count as a failed boot? Options:
+   - keep GRUB's behaviour (rescue/fallback), and document it;
+   - mark the slot good once the unlock succeeds;
+   - reset the try counter while the unlock service is only waiting for the network key, which is not a slot failure. Distinguishing that from an update that broke the network is the hard part.
 5. Consoles are ordered after Supervisor. Is a recovery prompt through the systemd password agent acceptable, or should `ha-cli` show a "data locked" state?
 6. Is it acceptable that overlay secrets (Wi-Fi PSK, SSH keys, unlock config) stay in clear in a first version, given section 2?
 7. Data disk move, wipe and detach with LUKS: implement, or refuse while encrypted? Which side owns it (OS, os-agent, Supervisor)?
