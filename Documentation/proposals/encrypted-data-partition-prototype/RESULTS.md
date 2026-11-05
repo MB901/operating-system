@@ -10,6 +10,35 @@ All runs happened in QEMU VMs (TCG, no KVM, 4 vCPU, 2 GiB RAM, OVMF) on a cloud 
 - The rootfs is recompressed with `mkfs.erofs -zlzma`, so boot timings are not comparable to the release image.
 - The VM has no Internet access: Supervisor stays in `setup` (no Core install), which matters for the boot counter (see below).
 
+## Final verification: the tested rootfs is the branch
+
+The branch changes six files that go into the image. `kernel.config` does not: the modules were built separately, see `logs/modules/` on `prototype/raw-logs`. The six files were checked with `sha256sum` against the final test rootfs (`https10.system0.erofs`, built from commit `477e7d4`; no change to `buildroot-external/` since then):
+
+| File | sha256 in the branch (HEAD) | sha256 in the test rootfs | Same |
+|---|---|---|---|
+| `usr/lib/systemd/system-generators/haos-data-crypt-generator` | `449c181b639a151d…` | `449c181b639a151d…` | yes |
+| `usr/lib/systemd/system/haos-data-crypt-post.service` | `584b598f7590401e…` | `584b598f7590401e…` | yes |
+| `usr/lib/systemd/system/haos-data-unlock.service` | `def186e2f4fdbe47…` | `def186e2f4fdbe47…` | yes |
+| `usr/libexec/haos-data-unlock` | `784a429b2b52064d…` | `784a429b2b52064d…` | yes |
+| `usr/libexec/haos-expand` | `11d390500e4f8b0b…` | `11d390500e4f8b0b…` | yes |
+| `usr/libexec/haos-wipe` | `bb467e15bb8cda0c…` | `bb467e15bb8cda0c…` | yes |
+
+- All six are identical.
+- The `dm-crypt.ko`, `xts.ko` and `essiv.ko` in that rootfs are identical to the published modules (`1eae1a34…`, `5549a4fb…`, `f526ef78…`).
+- `plain10.img`, `https10.img` and `tang10.img` carry exactly this rootfs (system partition compared byte for byte).
+
+The earlier runs used older versions of these files: for example, `haos-wipe` was absent from the test rootfs before `https9`, and `cryptsetup repair --key-slot` was still in `haos-data-unlock` in `https9`. So **every scenario was re-run on this final rootfs**:
+
+| Scenario | Image | Result on the final rootfs |
+|---|---|---|
+| `migrate` (plain → LUKS2 in place, power cut mid-conversion, resume) | plain10 | pass (details in row 11) |
+| `key-ok` | https10 | pass: unlocked, Docker up, no ordering cycle; `haos-expand` before unlock leaves the mapping at full size, ext4 at 5.2 GB, 1 GiB swap file active |
+| `key-denied` + recovery passphrase on the console | https10 | pass: prompt at 35 s, typed at 95 s, unlocked, Docker up |
+| `wipe` | https10 | pass: boot 2 plain ext4, both flags gone from `cmdline.txt`, unlock config gone; boot 3 normal |
+| `locked-reboots` | https10 | same problem: `A_TRY` 1 → 2 → 3, then boot 4 takes "Slot A (rescue shell)", no login within 900 s |
+| Tang 1–4 (reachable / down 3 min / other keys / rotated) | tang10 | pass / pass / refused as expected / pass |
+| T5, prototype rootfs without the flag | plain10 | same milestone order and same only failed unit (`systemd-time-wait-sync`) as the untouched 18.4. The remaining differences come from when the snapshot was taken: `NetworkManager-dispatcher` active at that moment, fewer Docker netns mounts. Timings are slower because three VMs ran at once |
+
 ## Summary
 
 | # | Scenario | Result |
