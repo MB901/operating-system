@@ -1,0 +1,39 @@
+$ cat /mnt/boot/cmdline.txt; blkid /dev/vda8; cryptsetup luksDump /dev/vda8 2>&1 | head -n 25; ls -la /mnt/overlay/etc/haos-data-crypt 2>&1; systemctl --failed --no-legend --plain
+console=tty0 console=ttyS0 haos.data-crypt=1
+/dev/vda8: UUID="746445a0-1254-4455-a5d6-b38af0e915ac" TYPE="crypto_LUKS" PARTLABEL="hassos-data" PARTUUID="a52a4597-fa3a-4851-aefd-2fbe9f849079"
+LUKS header information
+Version:       	2
+Epoch:         	75
+Metadata area: 	16384 [bytes]
+Keyslots area: 	16744448 [bytes]
+UUID:          	746445a0-1254-4455-a5d6-b38af0e915ac
+Label:         	(no label)
+Subsystem:     	(no subsystem)
+Flags:       	(no flags)
+Requirements:	online-reencrypt-v2 
+
+Data segments:
+  0: linear
+	offset: 5694799360 [bytes]
+	length: 16777216 [bytes]
+	cipher: (no SW encryption)
+
+  1: linear
+	offset: 16777216 [bytes]
+	length: 5057265152 [bytes]
+	cipher: (no SW encryption)
+
+  2: crypt
+	offset: 5090819584 [bytes]
+	length: 16777216 [bytes]
+total 6
+drwx------    2 root     root          1024 Nov  5 06:57 .
+drwxr-xr-x   12 root     root          1024 Nov  5 06:57 ..
+-rw-r--r--    1 root     root           542 Nov  5 06:57 ca.pem
+-rw-r--r--    1 root     root             0 Nov  5 06:57 convert
+-rw-r--r--    1 root     root            26 Nov  5 06:57 key-url
+-rw-------    1 root     root            35 Nov  5 06:57 recovery-passphrase
+-rw-------    1 root     root            44 Nov  5 06:57 token
+haos-data-unlock.service       loaded failed failed HAOS data partition unlock (network key)
+systemd-time-wait-sync.service loaded failed failed Wait Until Kernel Time Synchronized
+docker.socket                  loaded failed failed Docker Socket for the API

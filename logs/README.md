@@ -41,3 +41,15 @@ The `migrate` disk of `runs-mig5` and the `wipe` disk of `runs-7` were copied, a
 
 - `migrate-repro`: the partition is LUKS2 with `Requirements: online-reencrypt-v2`. The conversion of boot 2 had started and was interrupted by the planned power cut after 16 MiB; the rest is still a plaintext `linear` segment. The original boot 3 did get the key (`runs-mig5/key-server.log`, four 200 responses at 07:02), so it is the resume (`cryptsetup reencrypt --resume-only`) that failed there. In this reproduction the key server on port 8444 was not reachable from the VM ("Failed to connect"), so the resume itself is not shown.
 - `wipe-repro`: same failure as in `runs-7`, `haos-wipe: [ERROR] Data partition not found`, even with `udevadm settle`. The LUKS2 header is intact and nothing was erased. The cause is not established: LUKS detection (`blkid … /dev/disk/by-partlabel/hassos-data`) returned nothing at that point of the boot.
+
+### `repro/r2/`: migrate resume with the key server reachable (cause found)
+
+Same disk, booted again with the key server answering (`migrate-repro2.key-server.log`: 200 responses). The unlock script enters the resume path, and cryptsetup refuses:
+
+```
+[INFO] Resuming interrupted conversion of /dev/disk/by-partlabel/hassos-data
+Device requires reencryption recovery. Run repair first.
+[ERROR] Conversion failed, the data partition is left as it is
+```
+
+**Cause of the boot 3 failure:** after a power cut during `cryptsetup reencrypt --encrypt`, LUKS2 needs `cryptsetup repair` (with the key) before `cryptsetup reencrypt --resume-only`. The prototype skips the repair. The service is also started again and again by the units that need `/mnt/data` ("Start request repeated too quickly"). The fix (repair, then resume) is **not implemented or tested**. The data was not lost: 16 MiB encrypted, the rest still a plaintext linear segment, all of it described by the LUKS2 metadata.

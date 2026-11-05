@@ -1,0 +1,179 @@
+$ journalctl -b --no-pager -o short-monotonic -u haos-data-unlock -u haos-wipe -u haos-expand -u mnt-data.mount
+[   16.726566] homeassistant systemd[1]: Home Assistant OS Device Wipe Service was skipped because of an unmet condition check (ConditionKernelCommandLine=haos.wipe=1).
+[   28.924304] homeassistant systemd[1]: Starting HAOS data partition unlock (network key)...
+[   29.677524] homeassistant haos-data-unlock[445]: [INFO] Key provider: https
+[   30.434386] homeassistant haos-data-unlock[445]: [INFO] Resuming interrupted conversion of /dev/disk/by-partlabel/hassos-data
+[   30.573258] homeassistant haos-data-unlock[468]: Device requires reencryption recovery. Run repair first.
+[   30.637838] homeassistant haos-data-unlock[445]: [ERROR] Conversion failed, the data partition is left as it is
+[   30.648115] homeassistant systemd[1]: haos-data-unlock.service: Main process exited, code=exited, status=1/FAILURE
+[   30.651638] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   30.655961] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   30.663512] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   30.697181] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   30.699707] homeassistant systemd[1]: haos-data-unlock.service: Consumed 1.718s CPU time, 5.7M memory peak.
+[   37.965595] homeassistant systemd[1]: Starting HAOS data partition unlock (network key)...
+[   38.606910] homeassistant haos-data-unlock[493]: [INFO] Key provider: https
+[   39.171445] homeassistant haos-data-unlock[493]: [INFO] Resuming interrupted conversion of /dev/disk/by-partlabel/hassos-data
+[   39.310698] homeassistant haos-data-unlock[509]: Device requires reencryption recovery. Run repair first.
+[   39.365392] homeassistant haos-data-unlock[493]: [ERROR] Conversion failed, the data partition is left as it is
+[   39.378811] homeassistant systemd[1]: haos-data-unlock.service: Main process exited, code=exited, status=1/FAILURE
+[   39.383100] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   39.389688] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   39.393285] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   39.397786] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   39.398474] homeassistant systemd[1]: haos-data-unlock.service: Consumed 1.545s CPU time, 2.6M memory peak.
+[   39.450262] homeassistant systemd[1]: Starting HAOS data partition unlock (network key)...
+[   40.109599] homeassistant haos-data-unlock[512]: [INFO] Key provider: https
+[   40.676631] homeassistant haos-data-unlock[512]: [INFO] Resuming interrupted conversion of /dev/disk/by-partlabel/hassos-data
+[   40.829893] homeassistant haos-data-unlock[527]: Device requires reencryption recovery. Run repair first.
+[   40.894277] homeassistant haos-data-unlock[512]: [ERROR] Conversion failed, the data partition is left as it is
+[   40.898809] homeassistant systemd[1]: haos-data-unlock.service: Main process exited, code=exited, status=1/FAILURE
+[   40.902066] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   40.905091] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   40.906595] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   40.907898] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   40.908900] homeassistant systemd[1]: haos-data-unlock.service: Consumed 1.580s CPU time, 2.4M memory peak.
+[   40.955370] homeassistant systemd[1]: Starting HAOS data partition unlock (network key)...
+[   41.565164] homeassistant haos-data-unlock[530]: [INFO] Key provider: https
+[   42.114290] homeassistant haos-data-unlock[530]: [INFO] Resuming interrupted conversion of /dev/disk/by-partlabel/hassos-data
+[   42.266387] homeassistant haos-data-unlock[545]: Device requires reencryption recovery. Run repair first.
+[   42.326385] homeassistant haos-data-unlock[530]: [ERROR] Conversion failed, the data partition is left as it is
+[   42.330438] homeassistant systemd[1]: haos-data-unlock.service: Main process exited, code=exited, status=1/FAILURE
+[   42.332425] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   42.336783] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   42.338729] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   42.340451] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   42.342346] homeassistant systemd[1]: haos-data-unlock.service: Consumed 1.531s CPU time, 2.3M memory peak.
+[   42.383238] homeassistant systemd[1]: Starting HAOS data partition unlock (network key)...
+[   43.006032] homeassistant haos-data-unlock[548]: [INFO] Key provider: https
+[   43.496425] homeassistant haos-data-unlock[548]: [INFO] Resuming interrupted conversion of /dev/disk/by-partlabel/hassos-data
+[   43.648428] homeassistant haos-data-unlock[564]: Device requires reencryption recovery. Run repair first.
+[   43.707156] homeassistant haos-data-unlock[548]: [ERROR] Conversion failed, the data partition is left as it is
+[   43.711790] homeassistant systemd[1]: haos-data-unlock.service: Main process exited, code=exited, status=1/FAILURE
+[   43.714329] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   43.718807] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   43.721235] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   43.725825] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   43.726772] homeassistant systemd[1]: haos-data-unlock.service: Consumed 1.456s CPU time, 2.4M memory peak.
+[   43.796365] homeassistant systemd[1]: Starting HAOS data partition unlock (network key)...
+[   44.387248] homeassistant haos-data-unlock[567]: [INFO] Key provider: https
+[   44.947550] homeassistant haos-data-unlock[567]: [INFO] Resuming interrupted conversion of /dev/disk/by-partlabel/hassos-data
+[   45.081740] homeassistant haos-data-unlock[583]: Device requires reencryption recovery. Run repair first.
+[   45.139791] homeassistant haos-data-unlock[567]: [ERROR] Conversion failed, the data partition is left as it is
+[   45.153761] homeassistant systemd[1]: haos-data-unlock.service: Main process exited, code=exited, status=1/FAILURE
+[   45.157157] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   45.162863] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   45.167866] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   45.172674] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   45.173687] homeassistant systemd[1]: haos-data-unlock.service: Consumed 1.507s CPU time, 2.7M memory peak.
+[   45.216759] homeassistant systemd[1]: Starting HAOS data partition unlock (network key)...
+[   45.836945] homeassistant haos-data-unlock[586]: [INFO] Key provider: https
+[   46.428703] homeassistant haos-data-unlock[586]: [INFO] Resuming interrupted conversion of /dev/disk/by-partlabel/hassos-data
+[   46.568738] homeassistant haos-data-unlock[601]: Device requires reencryption recovery. Run repair first.
+[   46.626861] homeassistant haos-data-unlock[586]: [ERROR] Conversion failed, the data partition is left as it is
+[   46.638025] homeassistant systemd[1]: haos-data-unlock.service: Main process exited, code=exited, status=1/FAILURE
+[   46.643547] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   46.647924] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   46.649981] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   46.652556] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   46.653540] homeassistant systemd[1]: haos-data-unlock.service: Consumed 1.559s CPU time, 2.4M memory peak.
+[   46.682010] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   46.682334] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   46.683505] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   46.685159] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   46.686815] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   46.710672] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   46.710846] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   46.713812] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   46.715575] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   46.717162] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   46.735579] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   46.735707] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   46.736755] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   46.738053] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   46.739667] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   46.759378] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   46.759514] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   46.760412] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   46.761560] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   46.762953] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   46.781836] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   46.782014] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   46.782812] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   46.784293] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   46.785819] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   46.805068] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   46.805362] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   46.805984] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   46.807242] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   46.808749] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   46.826955] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   46.827099] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   46.827833] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   46.829506] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   46.830589] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   46.850736] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   46.850893] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   46.851689] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   46.853286] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   46.854817] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   46.877809] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   46.877970] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   46.878539] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   46.879942] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   46.881703] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   46.900896] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   46.902693] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   46.903710] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   46.905651] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   46.907033] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   46.924263] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   46.924376] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   46.924990] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   46.925965] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   46.927428] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   46.946331] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   46.946468] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   46.947339] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   46.948715] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   46.950561] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   46.968839] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   46.968992] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   46.969731] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   46.970985] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   46.972207] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   46.988856] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   46.989045] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   46.989580] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   46.990783] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   46.992757] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   47.020020] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   47.020143] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   47.021045] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   47.022582] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   47.024015] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   47.045595] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   47.045795] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   47.046820] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   47.049247] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   47.050583] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   47.083381] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   47.083548] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   47.084366] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   47.086706] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   47.089341] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   47.104451] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   47.104630] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   47.105436] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   47.106724] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   47.107966] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   47.124520] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   47.124666] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   47.125434] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   47.126631] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   47.127679] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   47.144495] homeassistant systemd[1]: haos-data-unlock.service: Start request repeated too quickly.
+[   47.144650] homeassistant systemd[1]: haos-data-unlock.service: Failed with result 'exit-code'.
+[   47.145319] homeassistant systemd[1]: Failed to start HAOS data partition unlock (network key).
+[   47.146519] homeassistant systemd[1]: Dependency failed for HAOS data partition (encrypted).
+[   47.149122] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
