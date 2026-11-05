@@ -4,7 +4,21 @@
 # ==============================================================================
 set -e
 
-DEVICE_CHILD="$(findfs LABEL="hassos-data")"
+# Encrypted data partition (haos.data-crypt=1): run before the unlock on the
+# LUKS2 partition itself (found by partition label). Growing the partition
+# needs no key; the mapping is opened afterwards at full size and
+# systemd-growfs grows the filesystem.
+CRYPT_PARTITION="/dev/disk/by-partlabel/hassos-data"
+CRYPT=""
+if grep -qw "haos.data-crypt=1" /proc/cmdline && \
+    [ "$(blkid -s TYPE -o value "${CRYPT_PARTITION}" 2> /dev/null)" = "crypto_LUKS" ]; then
+    CRYPT="1"
+    DEVICE_CHILD="$(readlink -f "${CRYPT_PARTITION}")"
+    echo "[INFO] Data partition is encrypted (${DEVICE_CHILD}), growing it before unlock"
+else
+    DEVICE_CHILD="$(findfs LABEL="hassos-data")"
+fi
+
 DEVICE_CHILD_NAME="$(basename "${DEVICE_CHILD}")"
 DEVICE_ROOT_NAME="$(lsblk -no pkname "${DEVICE_CHILD}")"
 DEVICE_ROOT="/dev/${DEVICE_ROOT_NAME}"
@@ -56,10 +70,15 @@ sfdisk -V "${DEVICE_ROOT}"
 partx -u "${DEVICE_ROOT}"
 udevadm settle
 
+
 # Make sure /dev/disk/by-label/hassos-data is actually present before exiting.
 # This avoids a race condition with mnt-data.mount which might fail to bind
 # otherwise:
 # Bound to unit dev-disk-by\x2dlabel-hassos\x2ddata.device, but unit isn't active.
+if [ -n "${CRYPT}" ]; then
+    echo "[INFO] Finished hassos-data partition resizing (encrypted)"
+    exit 0
+fi
 if ! systemctl start "dev-disk-by\\x2dlabel-hassos\\x2ddata.device"; then
     echo "[ERROR] Data partition not found!"
     exit 1

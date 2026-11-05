@@ -1,0 +1,21 @@
+[Unit]
+Description=HAOS data partition unlock (network key)
+Documentation=file:///usr/libexec/haos-data-unlock
+DefaultDependencies=no
+ConditionKernelCommandLine=haos.data-crypt=1
+Requires=mnt-overlay.mount dev-disk-by\x2dpartlabel-hassos\x2ddata.device
+After=mnt-overlay.mount dev-disk-by\x2dpartlabel-hassos\x2ddata.device
+Wants=network-online.target
+After=network-online.target
+Before=mnt-data.mount
+Conflicts=shutdown.target
+Before=shutdown.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# Waiting for the key server is expected (e.g. after a power cut the
+# router or NAS may come back after this machine). Never time out.
+TimeoutStartSec=infinity
+ExecStart=/usr/libexec/haos-data-unlock
+ExecStop=-/usr/sbin/cryptsetup close hassos-data

@@ -1,0 +1,238 @@
+#!/bin/sh
+# ==============================================================================
+# HAOS encrypted data partition unlock (PROTOTYPE)
+#
+# Gets the LUKS2 key of the data partition from the local network and
+# passes it to cryptsetup on stdin. The key is never written to disk.
+#
+# Key providers, configured on the (unencrypted) overlay partition in
+# /mnt/overlay/etc/haos-data-crypt/:
+#
+#   Tang (if key.jwe exists):
+#     key.jwe   the LUKS key encrypted with "clevis encrypt tang"; it can
+#               only be decrypted with the help of the Tang server(s)
+#               named inside it.
+#
+#   HTTPS (otherwise):
+#     key-url   https URL returning the raw key
+#     ca.pem    the only CA (or self-signed cert) accepted for the server
+#     token     bearer token sent to the server
+#
+# The network key is in keyslot 0. A recovery passphrase (keyslot 1) can be
+# typed on the console at any time while waiting: the prompt is shown by the
+# systemd console password agent, so a keyboard is never required.
+#
+# Conversion of an existing (plain ext4) installation: if the data partition
+# is not LUKS2 yet and "convert" exists in the configuration directory, the
+# partition is encrypted in place with "cryptsetup reencrypt --encrypt"
+# before being opened (the overlay is not touched). The filesystem is first
+# shrunk by 32 MiB to make room for the LUKS2 header. An interrupted
+# conversion (power cut) is resumed on the next boot. An optional
+# "recovery-passphrase" file is added to keyslot 1 and then deleted.
+#
+# The script retries forever: the key server may come back after this
+# machine (power cut), and failing here must never lead to a wipe.
+# ==============================================================================
+set -u
+
+CONF_DIR="/mnt/overlay/etc/haos-data-crypt"
+RUN_DIR="/run/haos-data-unlock"
+DEVICE="/dev/disk/by-partlabel/hassos-data"
+NAME="hassos-data"
+NET_KEY_SLOT="0"
+RECOVERY_KEY_SLOT="1"
+
+DELAY_MIN=5
+DELAY_MAX=60
+
+unlocked() {
+    [ -b "/dev/mapper/${NAME}" ]
+}
+
+if unlocked; then
+    echo "[INFO] Data partition already unlocked"
+    exit 0
+fi
+
+CONVERT=""
+if ! cryptsetup isLuks --type luks2 "${DEVICE}"; then
+    if [ -e "${CONF_DIR}/convert" ] && \
+        [ "$(blkid -s TYPE -o value "${DEVICE}")" = "ext4" ] && \
+        [ "$(blkid -s LABEL -o value "${DEVICE}")" = "hassos-data" ]; then
+        CONVERT="encrypt"
+    else
+        echo "[ERROR] ${DEVICE} is not a LUKS2 device, refusing to continue"
+        exit 1
+    fi
+elif cryptsetup luksDump "${DEVICE}" | grep -q "online-reencrypt"; then
+    CONVERT="resume"
+fi
+
+if [ -s "${CONF_DIR}/key.jwe" ]; then
+    PROVIDER="tang"
+    if ! command -v clevis > /dev/null; then
+        echo "[ERROR] key.jwe present but clevis is not installed"
+        exit 1
+    fi
+else
+    PROVIDER="https"
+    for f in key-url ca.pem token; do
+        if [ ! -s "${CONF_DIR}/${f}" ]; then
+            echo "[ERROR] Missing ${CONF_DIR}/${f}"
+            exit 1
+        fi
+    done
+    if ! head -n 1 "${CONF_DIR}/token" | grep -qE '^[A-Za-z0-9._~+/=-]+$'; then
+        echo "[ERROR] token contains unsupported characters"
+        exit 1
+    fi
+    KEY_URL="$(head -n 1 "${CONF_DIR}/key-url")"
+    case "${KEY_URL}" in
+        https://*) ;;
+        *)
+            echo "[ERROR] key-url must be an https:// URL"
+            exit 1
+            ;;
+    esac
+fi
+echo "[INFO] Key provider: ${PROVIDER}"
+
+mkdir -p "${RUN_DIR}/empty-capath"
+chmod 0700 "${RUN_DIR}"
+modprobe -q dm-crypt || true
+
+# Print the network key on stdout.
+fetch_key() {
+    case "${PROVIDER}" in
+        tang)
+            clevis decrypt < "${CONF_DIR}/key.jwe"
+            ;;
+        https)
+            # -q: ignore any .curlrc. --capath to an empty directory: libcurl
+            # is built with a default CA path, --cacert alone would still
+            # accept public CAs. The token goes through a config on stdin so
+            # it is not visible on the command line.
+            printf 'header = "Authorization: Bearer %s"\n' "$(head -n 1 "${CONF_DIR}/token")" \
+                | curl -q --config - --silent --show-error --fail \
+                    --proto '=https' --tlsv1.2 --globoff --noproxy '*' \
+                    --cacert "${CONF_DIR}/ca.pem" --capath "${RUN_DIR}/empty-capath" \
+                    --max-filesize 8192 --connect-timeout 10 --max-time 30 \
+                    "${KEY_URL}"
+            ;;
+    esac
+}
+
+# In-place conversion of the plain data partition (or resume of an
+# interrupted one). The key is kept in RAM (/run is a tmpfs) for the time
+# of the conversion only.
+KEY_FILE="${RUN_DIR}/key"
+convert_data() {
+    t0="$(date +%s)"
+    # cryptsetup reencrypt writes a temporary header file in the current
+    # directory; / is the read-only erofs root.
+    cd "${RUN_DIR}" || return 1
+    if [ "${CONVERT}" = "encrypt" ]; then
+        echo "[INFO] Converting ${DEVICE} to LUKS2 in place, this can take a long time"
+        e2fsck -fy "${DEVICE}"
+        rc=$?
+        if [ "${rc}" -gt 1 ]; then
+            echo "[ERROR] e2fsck failed (${rc}), not converting"
+            return 1
+        fi
+        size="$(blockdev --getsize64 "${DEVICE}")"
+        if ! resize2fs "${DEVICE}" "$(( (size - 32 * 1024 * 1024) / 1024 ))K"; then
+            echo "[ERROR] Cannot shrink the filesystem by 32 MiB, not converting"
+            return 1
+        fi
+        cryptsetup reencrypt --encrypt -q --type luks2 --cipher aes-xts-plain64 \
+            --key-size 512 --sector-size 512 --pbkdf pbkdf2 --pbkdf-force-iterations 1000 \
+            --key-slot "${NET_KEY_SLOT}" --reduce-device-size 32M \
+            --key-file "${KEY_FILE}" "${DEVICE}" || return 1
+    else
+        echo "[INFO] Resuming interrupted conversion of ${DEVICE}"
+        # After a crash during reencryption LUKS2 first needs a recovery of
+        # the interrupted hotzone ("Device requires reencryption recovery.
+        # Run repair first."), which needs the volume key.
+        echo "[INFO] Repairing the interrupted reencryption"
+        # (repair does not accept --key-slot; it tries the keyslots in turn)
+        cryptsetup repair -q --key-file "${KEY_FILE}" "${DEVICE}" || return 1
+        cryptsetup reencrypt --resume-only -q --key-slot "${NET_KEY_SLOT}" \
+            --key-file "${KEY_FILE}" "${DEVICE}" || return 1
+    fi
+    if [ -s "${CONF_DIR}/recovery-passphrase" ]; then
+        # same bytes as typed on the console: first line, no newline
+        (umask 077; printf '%s' "$(head -n 1 "${CONF_DIR}/recovery-passphrase")" > "${RUN_DIR}/recovery")
+        cryptsetup luksAddKey -q --key-file "${KEY_FILE}" --key-slot "${RECOVERY_KEY_SLOT}" \
+            --pbkdf argon2id "${DEVICE}" "${RUN_DIR}/recovery" \
+            && shred -u "${CONF_DIR}/recovery-passphrase"
+        shred -u "${RUN_DIR}/recovery"
+    fi
+    rm -f "${CONF_DIR}/convert"
+    echo "[INFO] Conversion finished in $(( $(date +%s) - t0 ))s"
+}
+
+if [ -n "${CONVERT}" ]; then
+    (umask 077; : > "${KEY_FILE}")
+    delay="${DELAY_MIN}"
+    until fetch_key > "${KEY_FILE}" && [ -s "${KEY_FILE}" ]; do
+        echo "[WARN] Cannot get the ${PROVIDER} key for the conversion, retrying in ${delay}s"
+        sleep "${delay}"
+        delay=$((delay * 2))
+        [ "${delay}" -gt "${DELAY_MAX}" ] && delay="${DELAY_MAX}"
+    done
+    if ! convert_data; then
+        shred -u "${KEY_FILE}"
+        echo "[ERROR] Conversion failed, the data partition is left as it is"
+        exit 1
+    fi
+    cryptsetup open --type luks2 --key-slot "${NET_KEY_SLOT}" \
+        --key-file "${KEY_FILE}" "${DEVICE}" "${NAME}"
+    rc=$?
+    shred -u "${KEY_FILE}"
+    exit "${rc}"
+fi
+
+# Recovery passphrase prompt on the console, in parallel with the network
+# attempts. Whoever opens the volume first wins. No --key-file here:
+# systemd-ask-password ends the passphrase with a newline, and cryptsetup
+# reading a passphrase from a non-tty stdin stops at the newline.
+recovery_prompt() {
+    while ! unlocked; do
+        systemd-ask-password --timeout=0 --id="haos-data-unlock:${NAME}" \
+            "Data partition is waiting for its network key. Recovery passphrase:" \
+            | cryptsetup open --type luks2 --key-slot "${RECOVERY_KEY_SLOT}" \
+                "${DEVICE}" "${NAME}" 2> /dev/null \
+            || sleep 2
+    done
+}
+recovery_prompt &
+PROMPT_PID=$!
+# Remove the console prompt once unlocked (the asker is a grandchild).
+trap 'kill "${PROMPT_PID}" 2> /dev/null; pkill -f "haos-data-unlock:${NAME}" 2> /dev/null' EXIT
+
+attempt=0
+delay="${DELAY_MIN}"
+while true; do
+    if unlocked; then
+        echo "[INFO] Data partition unlocked with the recovery passphrase"
+        exit 0
+    fi
+
+    attempt=$((attempt + 1))
+    if fetch_key | cryptsetup open --type luks2 --key-slot "${NET_KEY_SLOT}" \
+        --key-file=- "${DEVICE}" "${NAME}" && unlocked; then
+        echo "[INFO] Data partition unlocked with the ${PROVIDER} key (attempt ${attempt})"
+        exit 0
+    fi
+
+    echo "[WARN] Unlock attempt ${attempt} (${PROVIDER}) failed, retrying in ${delay}s"
+    i=0
+    while [ "${i}" -lt "${delay}" ] && ! unlocked; do
+        sleep 1
+        i=$((i + 1))
+    done
+    delay=$((delay * 2))
+    if [ "${delay}" -gt "${DELAY_MAX}" ]; then
+        delay="${DELAY_MAX}"
+    fi
+done
