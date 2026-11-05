@@ -35,7 +35,9 @@ CHECKS = [
     ("crypt status", "cryptsetup status hassos-data | head -n 8"),
     ("data mount", "findmnt /mnt/data; df -h /mnt/data | tail -n 1"),
     ("journal persistent", "findmnt /var/log/journal; ls /mnt/data/logs | head -n 3"),
-    ("timing", "systemd-analyze time; systemctl show -p ActiveEnterTimestampMonotonic mnt-data.mount docker.service"),
+    ("timing (monotonic, microseconds)", "for u in haos-data-unlock.service mnt-data.mount docker.service haos-supervisor.service; do "
+     "echo \"$u $(systemctl show -P ActiveEnterTimestampMonotonic $u)\"; done"),
+    ("swap", "swapon --show; free -m | head -n 3"),
     ("containers", "docker ps -a --format '{{.Names}} {{.Status}}' | head"),
 ]
 

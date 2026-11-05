@@ -68,23 +68,12 @@ ExecStart=/usr/lib/systemd/systemd-growfs /mnt/data
 TimeoutSec=0
 EOF
 
-# Stock unit is wanted by haos-bind.target (ordered Before=sysinit.target).
-cat > "${EARLY_DIR}/var-log-journal.mount" <<'EOF'
-[Unit]
-Description=Systemd persistent logging (encrypted data)
-DefaultDependencies=no
-Requires=mnt-data.mount
-After=mnt-data.mount
-Conflicts=umount.target
-Before=umount.target
-
-[Mount]
-What=/mnt/data/logs
-Where=/var/log/journal
-Type=None
-Options=bind
-LazyUnmount=yes
-EOF
+# Persistent journal: systemd-journal-flush.service (part of sysinit.target)
+# has RequiresMountsFor=/var/log/journal, so any mount unit there would be
+# waited for during sysinit and create an ordering cycle. Mask the stock
+# bind mount; haos-data-crypt-post.service binds it after the unlock and
+# then flushes the journal.
+ln -sf /dev/null "${EARLY_DIR}/var-log-journal.mount"
 
 cat > "${EARLY_DIR}/var-lib-docker.mount" <<'EOF'
 [Unit]

@@ -69,13 +69,21 @@ inject "${P_SYSTEM0}" "${WORK}/system0.new"
 
 echo "[3/6] Convert data partition to LUKS2"
 extract "${P_DATA}" "${WORK}/data.ext4"
-DATA_BYTES="$(( $(part_size ${P_DATA}) * 512 ))"
 LUKS_OFFSET=$((16 * 1024 * 1024))
-# The release data partition holds a minimal ext4; shrink it by the LUKS2
-# header size so header + filesystem fit in the same partition.
-e2fsck -fy "${WORK}/data.ext4" > /dev/null || true
-resize2fs "${WORK}/data.ext4" "$(( (DATA_BYTES - LUKS_OFFSET) / 1024 ))K" > /dev/null
-truncate -s "$(( DATA_BYTES - LUKS_OFFSET ))" "${WORK}/data.ext4"
+# The release ext4 is already at its minimum size, so make room for the
+# LUKS2 header by growing the partition by LUKS_OFFSET (same start, name,
+# type and PARTUUID). The rest of the disk is left for haos-expand.
+qemu-img resize -q -f raw "${OUT_IMG}" "${DISK_SIZE}"
+sgdisk -e "${OUT_IMG}" > /dev/null
+D_START="$(part_start ${P_DATA})"
+D_SIZE="$(part_size ${P_DATA})"
+D_GUID="$(sgdisk -i ${P_DATA} "${OUT_IMG}" | awk '/unique GUID/ {print $4}')"
+D_TYPE="$(sgdisk -i ${P_DATA} "${OUT_IMG}" | awk '/Partition GUID code/ {print $4}')"
+sgdisk -d ${P_DATA} \
+    -n ${P_DATA}:"${D_START}":$(( D_START + D_SIZE + LUKS_OFFSET / 512 - 1 )) \
+    -c ${P_DATA}:hassos-data -t ${P_DATA}:"${D_TYPE}" -u ${P_DATA}:"${D_GUID}" \
+    "${OUT_IMG}" > /dev/null
+DATA_BYTES="$(( $(part_size ${P_DATA}) * 512 ))"
 truncate -s "${DATA_BYTES}" "${WORK}/data.luks"
 # Slot 0: random network key (high entropy, cheap PBKDF is fine).
 cryptsetup luksFormat -q --type luks2 --cipher aes-xts-plain64 --key-size 512 \
@@ -120,6 +128,5 @@ mcopy -o -i "${WORK}/boot.vfat" "${WORK}/cmdline.txt" ::cmdline.txt
 inject "${P_BOOT}" "${WORK}/boot.vfat"
 echo "    cmdline.txt: $(cat "${WORK}/cmdline.txt")"
 
-echo "[6/6] Grow disk to ${DISK_SIZE} (exercises haos-expand on first boot)"
-qemu-img resize -q -f raw "${OUT_IMG}" "${DISK_SIZE}"
+echo "[6/6] Disk size ${DISK_SIZE}; data partition grows on first boot (haos-expand)"
 echo "Done: ${OUT_IMG}"

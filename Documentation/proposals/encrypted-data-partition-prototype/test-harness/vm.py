@@ -78,7 +78,7 @@ class VM:
         self.send("root")
         self.expect(r"# $|# ", 120)
         # quiet kernel/journal messages on the console while running commands
-        self.run("dmesg -n 1; stty cols 200")
+        self.run("dmesg -n 1; stty cols 200; export SYSTEMD_PAGER=cat PAGER=cat SYSTEMD_COLORS=0 TERM=dumb")
         return t
 
     def run(self, cmd: str, timeout: float = 300) -> tuple[int, str]:
