@@ -1,0 +1,9 @@
+
+## Scenario locked-reboots (3 power cuts while locked, then key back)
+
+- locked boot 1: kernel slot A, rescue entry: False, recovery prompt: True; grubenv after power cut: `ORDER=A B A_OK=1 A_TRY=1 B_TRY=0 B_OK=0 MACHINE_ID=88dba1eb98f04595b4abba140b7c2f2e`
+- locked boot 2: kernel slot A, rescue entry: False, recovery prompt: True; grubenv after power cut: `ORDER=A B A_OK=1 A_TRY=2 B_TRY=0 B_OK=0 MACHINE_ID=88dba1eb98f04595b4abba140b7c2f2e`
+- locked boot 3: kernel slot A, rescue entry: False, recovery prompt: True; grubenv after power cut: `ORDER=A B A_OK=1 A_TRY=3 B_TRY=0 B_OK=0 MACHINE_ID=88dba1eb98f04595b4abba140b7c2f2e`
+- boot 4 with key server up: kernel command line slot A, rescue entry: True
+- boot 4: **no console login** (locked-boot4: 'homeassistant login: ' not seen within 900s); serial log in locked-boot4.serial.log
+

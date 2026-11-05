@@ -1,0 +1,145 @@
+
+## Scenario key-ok
+
+- console login after 67s, data+docker active: **True** (at 68s)
+- Supervisor ran its resolution checks: **True** (at 99s)
+### unit states
+```
+$ systemctl is-active haos-data-unlock.service mnt-data.mount var-lib-docker.mount var-log-journal.mount containerd.service docker.service haos-supervisor.service; true
+active
+active
+active
+active
+active
+active
+active
+```
+### failed units
+```
+$ systemctl --failed --no-legend --plain
+systemd-time-wait-sync.service loaded failed failed Wait Until Kernel Time Synchronized
+```
+### ordering cycles
+```
+$ journalctl -b --no-pager | grep -i -E 'ordering cycle|breaking ordering' || echo none
+none
+```
+### unlock log
+```
+$ journalctl -b -u haos-data-unlock --no-pager -o short-monotonic | tail -n 12
+[   24.228238] homeassistant systemd[1]: Starting HAOS data partition unlock (network key)...
+[   24.817082] homeassistant haos-data-unlock[523]: [INFO] Key provider: https
+[   26.040104] homeassistant haos-data-unlock[523]: [INFO] Data partition unlocked with the https key (attempt 1)
+[   26.190909] homeassistant systemd[1]: Finished HAOS data partition unlock (network key).
+```
+### expand log
+```
+$ journalctl -b -u haos-expand --no-pager -o cat | tail -n 8
+[INFO] Data partition is encrypted (/dev/vda8), growing it before unlock
+[INFO] Checking if expanding data partition on /dev/vda8 is necessary
+[INFO] Detected GPT partition label on /dev/vda
+[INFO] Last usable logical block 12582878
+[INFO] Data partition end block 12582879
+[INFO] No resize of data partition needed
+haos-expand.service: Deactivated successfully.
+Finished HAOS data resizing (encrypted data partition).
+```
+### block devices
+```
+$ lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL,MOUNTPOINTS /dev/vda
+NAME            TYPE   SIZE FSTYPE      LABEL          MOUNTPOINTS
+vda             disk     6G                            
+|-vda1          part    32M vfat        hassos-boot    /mnt/boot
+|-vda2          part    24M squashfs                   
+|-vda3          part   256M erofs                      /
+|-vda4          part    24M                            
+|-vda5          part   256M                            
+|-vda6          part     8M                            
+|-vda7          part    96M ext4        hassos-overlay /etc/systemd/timesyncd.conf.d
+|                                                      /var/lib/NetworkManager
+|                                                      /etc/hosts
+|                                                      /etc/hostname
+|                                                      /etc/NetworkManager/system-connections
+|                                                      /root/.ssh
+|                                                      /var/lib/systemd
+|                                                      /etc/usb_modeswitch.d
+|                                                      /etc/modules-load.d
+|                                                      /etc/sysctl.d
+|                                                      /etc/udev/rules.d
+|                                                      /etc/dropbear
+|                                                      /var/lib/bluetooth
+|                                                      /root/.docker
+|                                                      /etc/modprobe.d
+|                                                      /etc/default
+|                                                      /mnt/overlay
+`-vda8          part   5.3G crypto_LUKS                
+  `-hassos-data crypt  5.3G ext4        hassos-data    /var/log/journal
+                                                       /var/lib/docker
+                                                       /mnt/data
+```
+### crypt status
+```
+$ cryptsetup status hassos-data | head -n 8
+/dev/mapper/hassos-data is active and is in use.
+  type:    LUKS2
+  cipher:  aes-xts-plain64
+  keysize: 512 [bits]
+  key location: keyring
+  device:  /dev/vda8
+  sector size:  512 [bytes]
+  offset:  32768 [512-byte units] (16777216 [bytes])
+```
+### data mount
+```
+$ findmnt /mnt/data; df -h /mnt/data | tail -n 1
+TARGET    SOURCE                  FSTYPE OPTIONS
+/mnt/data /dev/mapper/hassos-data ext4   rw,relatime,commit=30,mb_optimize_scan=0
+                          5.2G      1.6G      3.3G  33% /mnt/data
+```
+### journal persistent
+```
+$ findmnt /var/log/journal; ls /mnt/data/logs | head -n 3
+TARGET           SOURCE                         FSTYPE OPTIONS
+/var/log/journal /dev/mapper/hassos-data[/logs] ext4   rw,relatime,commit=30,mb_optimize_scan=0
+5eaae14f1ef9482db6529d874a6d0c29
+```
+### timing (monotonic, microseconds)
+```
+$ for u in haos-data-unlock.service mnt-data.mount docker.service haos-supervisor.service; do echo "$u $(systemctl show -P ActiveEnterTimestampMonotonic $u)"; done
+haos-data-unlock.service 26190720
+mnt-data.mount 26995806
+docker.service 61070045
+haos-supervisor.service 62784766
+```
+### swap
+```
+$ swapon --show; free -m | head -n 3
+NAME               TYPE  SIZE USED PRIO
+/mnt/data/swapfile file 1024M   0B   -2
+               total        used        free      shared  buff/cache   available
+Mem:            1966         278         191           0        1529        1687
+Swap:           1023           0        1023
+```
+### containers
+```
+$ docker ps -a --format '{{.Names}} {{.Status}}' | head
+hassio_cli Created
+hassio_supervisor Up 32 seconds
+```
+### data disk as seen by udisks2 / os-agent
+```
+$ busctl get-property org.freedesktop.UDisks2 /org/freedesktop/UDisks2/block_devices/dm_2d0 org.freedesktop.UDisks2.Block Device; busctl get-property io.hass.os /io/hass/os/DataDisk io.hass.os.DataDisk CurrentDevice
+ay 10 47 100 101 118 47 100 109 45 48 0
+s "/dev/mapper/hassos-data"
+```
+### supervisor data disk issues
+```
+$ docker logs hassio_supervisor 2>&1 | grep -i -E 'data.?disk|multiple' | tail -n 8; docker exec hassio_cli ha resolution info --raw-json 2>/dev/null | head -c 1500; echo
+{"result":"error","message":"System is not ready with state: setup"}
+```
+### slot / boot counter
+```
+$ cat /proc/cmdline | tr ' ' '\n' | grep -E 'rauc.slot|systemd.unit'; grep -a -E '^(ORDER|A_OK|A_TRY|B_OK|B_TRY)=' /mnt/boot/EFI/BOOT/grubenv | tr '\n' ' '; echo
+rauc.slot=A
+ORDER=A B A_OK=1 A_TRY=1 B_TRY=0 B_OK=0
+```

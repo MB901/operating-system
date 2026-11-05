@@ -1,0 +1,2 @@
+qemu-system-x86_64: -serial unix:/home/user/proto/runs-mig5/migdbg.serial,server=on,wait=on: info: QEMU waiting for connection on: disconnected:unix:/home/user/proto/runs-mig5/migdbg.serial,server=on
+qemu-system-x86_64: terminating on signal 15 from pid 6907 ()

@@ -1,0 +1,19 @@
+Kernel source used to build dm-crypt.ko, xts.ko, essiv.ko
+
+URL:     https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.58.tar.xz
+SHA-256: 069b19f9032c4dac8149ae4b6520c35debca0f42a9f6d52ee55ba6ca9b818013
+         (checked against https://cdn.kernel.org/pub/linux/kernel/v6.x/sha256sums.asc;
+          the GPG signature of that file was NOT verified)
+HAOS kernel patches: NOT applied (the loop pointed at a directory; they touch
+         ipv6 / vlan / bluetooth only, not the block or crypto code).
+
+Config: kernel-config-release-18.4-ikconfig was extracted from the bzImage of
+        haos_generic-x86-64-18.4.img (scripts/extract-ikconfig, CONFIG_IKCONFIG=y).
+        kernel-config-used-for-modules-6.18.58-haos = that config plus
+        ./scripts/config --module DM_CRYPT --module CRYPTO_XTS, then
+        make olddefconfig (adds CONFIG_CRYPTO_ESSIV=m); only the toolchain
+        version lines differ otherwise.
+Build:  make modules_prepare
+        make KBUILD_MODPOST_WARN=1 drivers/md/dm-crypt.ko crypto/xts.ko crypto/essiv.ko
+        host gcc 13.3.0 (Ubuntu 24.04), not the Buildroot toolchain.
+vermagic: 6.18.58-haos SMP preempt mod_unload (no MODVERSIONS, no module signing)

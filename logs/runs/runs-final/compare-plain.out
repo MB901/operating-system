@@ -1,0 +1,19 @@
+
+## Scenario compare (plain.img)
+
+- console login at 90s; units and order saved as compare-plain.units.txt / compare-plain.order.txt
+```
+mnt-overlay.mount 16299052
+mnt-data.mount 28109563
+haos-data-unlock.service 0
+sysinit.target 40534301
+basic.target 40618312
+network-online.target 46601304
+docker.service 83082750
+haos-supervisor.service 85077366
+multi-user.target 85198624
+4626445
+systemd-time-wait-sync.service loaded failed failed Wait Until Kernel Time Synchronized
+systemd-analyze: not in the image
+```
+

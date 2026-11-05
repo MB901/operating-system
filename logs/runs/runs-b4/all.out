@@ -1,0 +1,196 @@
+
+## Scenario key-denied (+ recovery passphrase on the console)
+
+- recovery passphrase prompt on the console: **True** (at 38s)
+- passphrase typed at 98s, console login at 136s, data+docker active: **True** (at 137s)
+### unit states
+```
+$ systemctl is-active haos-data-unlock.service mnt-data.mount var-lib-docker.mount var-log-journal.mount containerd.service docker.service haos-supervisor.service; true
+active
+active
+active
+active
+active
+active
+active
+```
+### failed units
+```
+$ systemctl --failed --no-legend --plain
+haos-expand.service            loaded failed failed HAOS data resizing
+haos-swapfile.service          loaded failed failed HAOS swap
+systemd-time-wait-sync.service loaded failed failed Wait Until Kernel Time Synchronized
+```
+### ordering cycles
+```
+$ journalctl -b --no-pager | grep -i -E 'ordering cycle|breaking ordering' || echo none
+none
+```
+### unlock log
+```
+$ journalctl -b -u haos-data-unlock --no-pager -o short-monotonic | tail -n 12
+[   34.449679] homeassistant haos-data-unlock[454]: [WARN] Unlock attempt 1 (https) failed, retrying in 5s
+[   39.948340] homeassistant haos-data-unlock[490]: curl: (22) The requested URL returned error: 403
+[   39.971437] homeassistant haos-data-unlock[488]: Nothing to read on input.
+[   39.991285] homeassistant haos-data-unlock[454]: [WARN] Unlock attempt 2 (https) failed, retrying in 10s
+[   50.827419] homeassistant haos-data-unlock[508]: curl: (22) The requested URL returned error: 403
+[   50.842814] homeassistant haos-data-unlock[506]: Nothing to read on input.
+[   50.854796] homeassistant haos-data-unlock[454]: [WARN] Unlock attempt 3 (https) failed, retrying in 20s
+[   71.886508] homeassistant haos-data-unlock[539]: curl: (22) The requested URL returned error: 403
+[   71.904043] homeassistant haos-data-unlock[537]: Nothing to read on input.
+[   71.923376] homeassistant haos-data-unlock[454]: [WARN] Unlock attempt 4 (https) failed, retrying in 40s
+[   97.084500] homeassistant haos-data-unlock[454]: [INFO] Data partition unlocked with the recovery passphrase
+[   97.314783] homeassistant systemd[1]: Finished HAOS data partition unlock (network key).
+```
+### expand log
+```
+$ journalctl -b -u haos-expand --no-pager -o cat | tail -n 8
+Starting HAOS data resizing...
+[INFO] Data partition is encrypted, parent partition /dev/vda8
+sfdisk: /dev/vda8: does not contain a recognized partition table
+haos-expand.service: Main process exited, code=exited, status=1/FAILURE
+haos-expand.service: Failed with result 'exit-code'.
+Failed to start HAOS data resizing.
+```
+### block devices
+```
+$ lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL,MOUNTPOINTS /dev/vda
+NAME            TYPE   SIZE FSTYPE      LABEL          MOUNTPOINTS
+vda             disk     6G                            
+|-vda1          part    32M vfat        hassos-boot    /mnt/boot
+|-vda2          part    24M squashfs                   
+|-vda3          part   256M erofs                      /
+|-vda4          part    24M                            
+|-vda5          part   256M                            
+|-vda6          part     8M                            
+|-vda7          part    96M ext4        hassos-overlay /etc/systemd/timesyncd.conf.d
+|                                                      /var/lib/NetworkManager
+|                                                      /etc/hosts
+|                                                      /etc/hostname
+|                                                      /etc/NetworkManager/system-connections
+|                                                      /var/lib/bluetooth
+|                                                      /etc/usb_modeswitch.d
+|                                                      /root/.docker
+|                                                      /etc/udev/rules.d
+|                                                      /var/lib/systemd
+|                                                      /etc/sysctl.d
+|                                                      /root/.ssh
+|                                                      /etc/modprobe.d
+|                                                      /etc/modules-load.d
+|                                                      /etc/dropbear
+|                                                      /etc/default
+|                                                      /mnt/overlay
+`-vda8          part   968M crypto_LUKS                
+  `-hassos-data crypt  952M ext4        hassos-data    /var/log/journal
+                                                       /var/lib/docker
+                                                       /mnt/data
+```
+### crypt status
+```
+$ cryptsetup status hassos-data | head -n 8
+/dev/mapper/hassos-data is active and is in use.
+  type:    LUKS2
+  cipher:  aes-xts-plain64
+  keysize: 512 [bits]
+  key location: keyring
+  device:  /dev/vda8
+  sector size:  512 [bytes]
+  offset:  32768 [512-byte units] (16777216 [bytes])
+```
+### data mount
+```
+$ findmnt /mnt/data; df -h /mnt/data | tail -n 1
+TARGET    SOURCE                  FSTYPE OPTIONS
+/mnt/data /dev/mapper/hassos-data ext4   rw,relatime,commit=30
+                        900.8M    639.8M    197.5M  76% /mnt/data
+```
+### journal persistent
+```
+$ findmnt /var/log/journal; ls /mnt/data/logs | head -n 3
+TARGET           SOURCE                         FSTYPE OPTIONS
+/var/log/journal /dev/mapper/hassos-data[/logs] ext4   rw,relatime,commit=30
+a950b8fa2eeb49eab21bf567ad6c329c
+```
+### timing (monotonic, microseconds)
+```
+$ for u in haos-data-unlock.service mnt-data.mount docker.service haos-supervisor.service; do echo "$u $(systemctl show -P ActiveEnterTimestampMonotonic $u)"; done
+haos-data-unlock.service 97314631
+mnt-data.mount 98450692
+docker.service 128124529
+haos-supervisor.service 130367992
+```
+### swap
+```
+$ swapon --show; free -m | head -n 3
+total        used        free      shared  buff/cache   available
+Mem:            1966         185        1441           0         369        1780
+Swap:              0           0           0
+```
+### containers
+```
+$ docker ps -a --format '{{.Names}} {{.Status}}' | head
+hassio_supervisor Created
+```
+### data disk as seen by udisks2 / os-agent
+```
+$ busctl get-property org.freedesktop.UDisks2 /org/freedesktop/UDisks2/block_devices/dm_2d0 org.freedesktop.UDisks2.Block Device; busctl get-property io.hass.os /io/hass/os/DataDisk io.hass.os.DataDisk CurrentDevice
+ay 10 47 100 101 118 47 100 109 45 48 0
+s ""
+```
+### supervisor data disk issues
+```
+$ docker logs hassio_supervisor 2>&1 | grep -i -E 'data.?disk|multiple' | tail -n 8; docker exec hassio_cli ha resolution info --raw-json 2>/dev/null | head -c 1500; echo
+
+```
+### slot / boot counter
+```
+$ cat /proc/cmdline | tr ' ' '\n' | grep -E 'rauc.slot|systemd.unit'; grep -a -E '^(ORDER|A_OK|A_TRY|B_OK|B_TRY)=' /mnt/boot/EFI/BOOT/grubenv | tr '\n' ' '; echo
+rauc.slot=A
+ORDER=A B A_OK=1 A_TRY=1 B_TRY=0 B_OK=0
+```
+
+
+## Scenario wipe (haos.wipe=1 on an encrypted system)
+
+### boot 1 (encrypted), wipe requested
+```
+NAME          TYPE  FSTYPE      LABEL
+vda8          part  crypto_LUKS 
+`-hassos-data crypt ext4        hassos-data
+console=tty0 console=ttyS0 haos.data-crypt=1 haos.wipe=1
+```
+### boot 2 (console login at 114s)
+```
+console=tty0 console=ttyS0 haos.data-crypt=1 haos.wipe=1
+/dev/vda8: UUID="5880db0a-55b9-4ef5-bf18-7d85c97f7415" TYPE="crypto_LUKS" PARTLABEL="hassos-data" PARTUUID="a52a4597-fa3a-4851-aefd-2fbe9f849079"
+LUKS
+total 5
+drwx------    2 root     root          1024 Nov  5 06:28 .
+drwxr-xr-x   12 root     root          1024 Nov  5 06:34 ..
+Starting Home Assistant OS Device Wipe Service...
+[ERROR] Data partition not found
+haos-wipe.service: Main process exited, code=exited, status=1/FAILURE
+haos-wipe.service: Failed with result 'exit-code'.
+Failed to start Home Assistant OS Device Wipe Service.
+0
+haos-wipe.service              loaded failed failed Home Assistant OS Device Wipe Service
+systemd-time-wait-sync.service loaded failed failed Wait Until Kernel Time Synchronized
+```
+### boot 3 (console login at 124s)
+```
+console=tty0 console=ttyS0 haos.data-crypt=1 haos.wipe=1
+/dev/vda8: UUID="5880db0a-55b9-4ef5-bf18-7d85c97f7415" TYPE="crypto_LUKS" PARTLABEL="hassos-data" PARTUUID="a52a4597-fa3a-4851-aefd-2fbe9f849079"
+LUKS
+total 5
+drwx------    2 root     root          1024 Nov  5 06:28 .
+drwxr-xr-x   12 root     root          1024 Nov  5 06:34 ..
+Starting Home Assistant OS Device Wipe Service...
+[ERROR] Data partition not found
+haos-wipe.service: Main process exited, code=exited, status=1/FAILURE
+haos-wipe.service: Failed with result 'exit-code'.
+Failed to start Home Assistant OS Device Wipe Service.
+0
+haos-wipe.service              loaded failed failed Home Assistant OS Device Wipe Service
+systemd-time-wait-sync.service loaded failed failed Wait Until Kernel Time Synchronized
+```
+

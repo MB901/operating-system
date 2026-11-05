@@ -1,0 +1,11 @@
+2026/11/05 05:58:13 socat[1439] E bind(5, {AF=2 0.0.0.0:8888}, 16): Address already in use
+<unknown> POST /rec/_sW6pE8FkNlII4scG_d_3w51Hi0xbqn4nBb21vOky2E => 200 (../src/tangd.c:181)
+2026/11/05 06:10:10 socat[2057] W exiting on signal 15
+<unknown> POST /rec/_sW6pE8FkNlII4scG_d_3w51Hi0xbqn4nBb21vOky2E => 404 (../src/tangd.c:153)
+<unknown> POST /rec/_sW6pE8FkNlII4scG_d_3w51Hi0xbqn4nBb21vOky2E => 404 (../src/tangd.c:153)
+<unknown> POST /rec/_sW6pE8FkNlII4scG_d_3w51Hi0xbqn4nBb21vOky2E => 404 (../src/tangd.c:153)
+<unknown> POST /rec/_sW6pE8FkNlII4scG_d_3w51Hi0xbqn4nBb21vOky2E => 404 (../src/tangd.c:153)
+<unknown> POST /rec/_sW6pE8FkNlII4scG_d_3w51Hi0xbqn4nBb21vOky2E => 404 (../src/tangd.c:153)
+2026/11/05 06:12:42 socat[2308] W exiting on signal 15
+<unknown> POST /rec/_sW6pE8FkNlII4scG_d_3w51Hi0xbqn4nBb21vOky2E => 200 (../src/tangd.c:181)
+2026/11/05 06:16:51 socat[2469] W exiting on signal 15

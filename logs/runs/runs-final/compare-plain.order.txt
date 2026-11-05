@@ -1,0 +1,130 @@
+10.786569 Started Dispatch Password Requests to Console Directory Watch.
+10.786646 Started Forward Password Requests to Wall Directory Watch.
+10.787283 Reached target Local Encrypted Volumes.
+10.787367 Reached target HAOS hardware targets.
+10.787444 Reached target HAOS zram targets.
+10.787521 Reached target Local Integrity Protected Volumes.
+10.787618 Reached target NFS client services.
+10.787694 Reached target Path Units.
+10.787766 Reached target Preparation for Remote File Systems.
+10.787839 Reached target Remote Encrypted Volumes.
+10.787954 Reached target Remote File Systems.
+10.788033 Reached target Remote Verity Protected Volumes.
+10.788137 Reached target Slice Units.
+10.788219 Reached target Local Verity Protected Volumes.
+10.788442 Reached target RPC Port Mapper.
+10.790536 Mounted Huge Pages File System.
+10.790639 Mounted POSIX Message Queue File System.
+10.790720 Mounted Kernel Debug File System.
+10.790795 Mounted Kernel Trace File System.
+10.790975 Finished Load Kernel Module configfs.
+10.791622 Finished Create List of Static Device Nodes.
+10.791934 Finished Load Kernel Module drm.
+10.792505 Finished Load Kernel Module efi_pstore.
+10.792678 Finished Load Kernel Module fuse.
+10.800785 Finished Generate network units from Kernel command line.
+10.800978 Reached target Preparation for Network.
+10.801238 Finished Load udev Rules from Credentials.
+10.801412 Finished Remount Root and Kernel File Systems.
+10.825660 Started Journal Service.
+11.008568 Finished HAOS ZRAM var.
+11.022919 Finished HAOS ZRAM tmp.
+11.065362 Started D-Bus System Message Bus.
+11.436666 Finished Create Static Device Nodes in /dev gracefully.
+11.838246 Finished Create Static Device Nodes in /dev.
+11.861262 Finished Coldplug All udev Devices.
+11.871924 Reached target Preparation for Local File Systems.
+12.033765 Started Disk Manager.
+12.452762 Started Rule-based Manager for Device Events and Files.
+15.278822 Finished File System Check on /dev/disk/by-label/hassos-boot.
+15.620572 Finished File System Check on /dev/disk/by-label/hassos-overlay.
+15.889845 Mounted HAOS boot partition.
+15.976894 Finished File System Check on /dev/disk/by-label/hassos-data.
+16.303595 Mounted HAOS overlay partition.
+16.774162 Mounted Dropbear persistent keys.
+17.000495 Mounted Kernel persistent sysctl.d.
+17.090492 Mounted Persistent /etc/default directory.
+17.145584 Mounted Udev persistent rules.d.
+17.196478 Mounted Kernel persistent modules-load.d.
+17.301282 Mounted Docker persistent user.
+17.313336 Mounted Dropbear persistent user.
+17.405365 Mounted Kernel persistent modprobe.d.
+17.413237 Mounted USB modeswitch persistent directory.
+17.929477 Finished HAOS overlay setup.
+18.295569 Finished Apply Kernel Variables.
+18.476410 Mounted NetworkManager persistent system connections.
+18.481271 Mounted Hosts persistent configuration.
+18.543511 Finished Virtual Console Setup.
+18.593179 Mounted Hostname persistent configuration.
+18.598294 Mounted Timesyncd persistent configuration.
+20.170894 Finished Retrigger udev rules after user rules mounted.
+23.316394 Finished HAOS data resizing.
+23.516828 Finished Virtual Console Setup.
+27.866700 Finished HAOS data disk detach.
+28.109727 Mounted HAOS data partition.
+28.406357 Finished Grow File System on /mnt/data.
+37.773298 Finished HAOS swap.
+37.937341 Reached target Swaps.
+38.183898 Mounted Temporary Directory /tmp.
+38.189165 Mounted Buildroot /var tmpfs.
+38.556964 Mounted NetworkManager persistent data.
+38.584983 Mounted Bluetooth persistent state.
+38.594606 Mounted Docker persistent data.
+38.599518 Mounted Systemd persistent state.
+38.604255 Mounted Systemd persistent logging.
+38.632512 Reached target HAOS overlay targets.
+38.635377 Reached target Local File Systems.
+38.856707 Finished Load/Save OS Random Seed.
+38.865038 Reached target First Boot Complete.
+38.993761 Finished Flush Journal to Persistent Storage.
+39.387984 Finished Create System Files and Directories.
+40.199681 Started Security Auditing Service.
+40.523055 Started Network Name Resolution.
+40.531469 Reached target Host and Network Name Lookups.
+40.534401 Reached target System Initialization.
+40.539008 Started Daily Cleanup of Temporary Directories.
+40.615932 Reached target Socket Units.
+40.618399 Reached target Basic System.
+41.195913 Finished Configure multigenerational LRU.
+41.249033 Finished Docker environment and config initialization.
+41.380994 Started RPC Bind.
+42.514852 Finished HAOS persists data on bootstate.
+42.570417 Started WPA supplicant.
+42.932054 Started Home Assistant OS Agent.
+42.959191 Started RAUC Update Service.
+43.289661 Started User Login Management.
+44.917193 Started Hostname Service.
+45.281908 Started Network Manager.
+45.312402 Reached target Network.
+45.599545 Started RAUC Update Service.
+45.652624 Finished Ensure rauc.db contains version information.
+45.839152 Finished Permit User Sessions.
+45.989130 Started Network Manager Script Dispatcher Service.
+46.583393 Finished Network Manager Wait Online.
+46.601488 Reached target Network is Online.
+47.103528 Started Notify NFS peers of a restart.
+47.117670 Finished HAOS Configuration Manager.
+47.946315 Started Network Time Synchronization.
+47.973845 Reached target System Time Set.
+48.414300 Started containerd container runtime.
+61.808656 Reached target System Time Synchronized.
+61.819616 Started Discard unused filesystem blocks once a week.
+61.823894 Reached target Timer Units.
+62.538779 Finished HAOS AppArmor.
+83.085389 Started Docker Application Container Engine.
+85.077619 Started HAOS supervisor.
+85.121542 Started Home Assistant CLI.
+85.162176 Started Serial Getty on ttyS0.
+85.188850 Reached target Login Prompts.
+85.198743 Reached target Multi-User System.
+90.287899 Started libcontainer container b604bea74d4d1b8bbda45899cb2b5e8c0dde614904575acfbe12c95f835c7156.
+112.592823 Started Time & Date Service.
+112.749012 Started Hostname Service.
+113.568673 Started Network Manager Script Dispatcher Service.
+115.511144 Finished Supervisor gateway firewall rules.
+118.584069 Started libcontainer container ec12a5e18f12c74e8f6536dabb6a99ab5bfd415ecbe59388d3cb70458a2b08a6.
+123.632232 Started libcontainer container 7261ebc3696b8d0f024c946caf83622719d927f35d9ca7f1970c55bccf34c8ca.
+127.847829 Started libcontainer container b07d09e06934eae416451e78505f435a0dc05fa3fb385656f35ae3101ccbe020.
+131.379557 Started libcontainer container c588d00805d9ffdacb04be4267411a14f3f89b53e011d3cc947a0393053d23fb.
+136.618401 Started libcontainer container 0e1ecb96a54bf2cb93ee02b0500b691336bab12c3442e752178d4700f040219b.
+139.186244 Started libcontainer container 7601c9420fe0f404455f81b57c305e1e89ae5d879bc2423e5fc4c45c64da57dd.
