@@ -7,10 +7,11 @@ Throw-away prototype for [the design notes](../encrypted-data-partition.md). It 
 | File | Role |
 |---|---|
 | `buildroot-external/board/pc/generic-x86-64/kernel.config` | `DM_CRYPT`, `CRYPTO_XTS`, `CRYPTO_AES_NI_INTEL` (`=y`; not built, see below) |
-| `rootfs-overlay/usr/lib/systemd/system-generators/haos-data-crypt-generator` | Only with `haos.data-crypt=1`: moves `/mnt/data` and its consumers after the unlock, disables move/detach/wipe |
+| `rootfs-overlay/usr/lib/systemd/system-generators/haos-data-crypt-generator` | Only with `haos.data-crypt=1`: moves `/mnt/data` and its consumers after the unlock, disables data disk move and detach; with `haos.wipe=1` it does nothing, so the stock units and `haos-wipe` run |
 | `rootfs-overlay/usr/lib/systemd/system/haos-data-unlock.service` | Runs the unlock after `network-online.target` |
 | `rootfs-overlay/usr/libexec/haos-data-unlock` | HTTPS or Tang provider, plus a recovery passphrase prompt on the console; retries forever |
 | `rootfs-overlay/usr/lib/systemd/system/haos-data-crypt-post.service` | tmpfiles for `/mnt/data`, persistent journal bind and flush |
+| `rootfs-overlay/usr/libexec/haos-wipe` | With `haos.data-crypt=1`: waits for the partition device, erases the LUKS2 keyslots and header, removes both flags from `cmdline.txt` |
 | `rootfs-overlay/usr/libexec/haos-expand` | Grows the partition under a dm-crypt mapping, then `cryptsetup resize` |
 | `test-harness/` | Builds a test image from a release image and boots scenarios in QEMU |
 

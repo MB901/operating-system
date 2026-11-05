@@ -8,9 +8,20 @@ PARTITION_DATA="/dev/disk/by-label/hassos-data"
 # before unlock. The wipe also erases the unlock configuration (overlay), so
 # destroy the LUKS2 keyslots and header and go back to a plain partition.
 CRYPT_PARTITION="/dev/disk/by-partlabel/hassos-data"
-# This runs very early: make sure udev has created the by-partlabel links.
-udevadm settle || true
-if [ "$(blkid -s TYPE -o value "$CRYPT_PARTITION" 2> /dev/null)" = "crypto_LUKS" ]; then
+if grep -qw "haos.data-crypt=1" /proc/cmdline; then
+    # This runs very early, possibly before udev has processed the disk
+    # ("udevadm settle" can return before the initial trigger). Wait for the
+    # partition's device unit, as haos-data does for the external disk.
+    # Only in encrypted mode: MBR layouts have no partition labels.
+    if ! systemctl start "dev-disk-by\\x2dpartlabel-hassos\\x2ddata.device"; then
+        echo "[ERROR] Data partition (partition label hassos-data) not found"
+        exit 1
+    fi
+    echo "[INFO] Using $(command -v blkid) to detect the data partition type"
+    CRYPT_TYPE="$(blkid -s TYPE -o value "$CRYPT_PARTITION" || true)"
+    echo "[INFO] Data partition type: ${CRYPT_TYPE:-unknown}"
+fi
+if [ "${CRYPT_TYPE:-}" = "crypto_LUKS" ]; then
     PARTITION_DATA="$CRYPT_PARTITION"
     echo "[INFO] Erasing LUKS2 keyslots and header of the data partition"
     cryptsetup erase -q "$PARTITION_DATA"

@@ -150,6 +150,12 @@ convert_data() {
             --key-file "${KEY_FILE}" "${DEVICE}" || return 1
     else
         echo "[INFO] Resuming interrupted conversion of ${DEVICE}"
+        # After a crash during reencryption LUKS2 first needs a recovery of
+        # the interrupted hotzone ("Device requires reencryption recovery.
+        # Run repair first."), which needs the volume key.
+        echo "[INFO] Repairing the interrupted reencryption"
+        cryptsetup repair -q --key-slot "${NET_KEY_SLOT}" \
+            --key-file "${KEY_FILE}" "${DEVICE}" || return 1
         cryptsetup reencrypt --resume-only -q --key-slot "${NET_KEY_SLOT}" \
             --key-file "${KEY_FILE}" "${DEVICE}" || return 1
     fi
