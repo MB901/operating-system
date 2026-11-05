@@ -133,12 +133,21 @@ for unit in haos-data.service haos-data-disk-detach.service; do
     ln -sf /dev/null "${EARLY_DIR}/${unit}"
 done
 
-# haos-expand must look at the opened mapping, not at a plain partition
-# that is about to be converted.
-mkdir -p "${EARLY_DIR}/haos-expand.service.d"
-cat > "${EARLY_DIR}/haos-expand.service.d/50-haos-data-crypt.conf" <<'EOF'
+# haos-expand grows the LUKS2 partition before the unlock (no key needed),
+# so the mapping is opened at full size. Replace the stock unit, which
+# requires the filesystem label device (only visible after the unlock).
+cat > "${EARLY_DIR}/haos-expand.service" <<'EOF'
 [Unit]
-After=haos-data-unlock.service
+Description=HAOS data resizing (encrypted data partition)
+DefaultDependencies=no
+Requires=dev-disk-by\x2dpartlabel-hassos\x2ddata.device
+After=dev-disk-by\x2dpartlabel-hassos\x2ddata.device
+Before=haos-data-unlock.service mnt-data.mount
+
+[Service]
+Type=oneshot
+TimeoutStartSec=infinity
+ExecStart=/usr/libexec/haos-expand
 EOF
 
 # Recovery passphrase prompt: systemd-ask-password-wall.service stops the

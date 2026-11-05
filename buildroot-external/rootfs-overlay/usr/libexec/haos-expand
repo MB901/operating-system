@@ -4,32 +4,23 @@
 # ==============================================================================
 set -e
 
-DEVICE_CHILD="$(findfs LABEL="hassos-data")"
-
-# Encrypted data partition (haos.data-crypt=1): the label is on the opened
-# dm-crypt mapping, the partition to grow is its parent.
-CRYPT_NAME=""
-if [ "$(lsblk -dno TYPE "${DEVICE_CHILD}")" = "crypt" ]; then
-    CRYPT_NAME="hassos-data"
-    # lsblk does not report PKNAME for dm devices and /dev/mapper/* may be
-    # a device node rather than a symlink: find the parent through sysfs.
-    MAJ_MIN="$(lsblk -dno MAJ:MIN "${DEVICE_CHILD}" | tr -d ' ')"
-    set -- "/sys/dev/block/${MAJ_MIN}/slaves/"*
-    if [ ! -e "$1" ]; then
-        echo "[ERROR] Cannot find the partition below ${DEVICE_CHILD}"
-        exit 1
-    fi
-    DEVICE_CHILD="/dev/$(basename "$1")"
-    echo "[INFO] Data partition is encrypted, parent partition ${DEVICE_CHILD}"
+# Encrypted data partition (haos.data-crypt=1): run before the unlock on the
+# LUKS2 partition itself (found by partition label). Growing the partition
+# needs no key; the mapping is opened afterwards at full size and
+# systemd-growfs grows the filesystem.
+CRYPT_PARTITION="/dev/disk/by-partlabel/hassos-data"
+CRYPT=""
+if grep -qw "haos.data-crypt=1" /proc/cmdline && \
+    [ "$(blkid -s TYPE -o value "${CRYPT_PARTITION}" 2> /dev/null)" = "crypto_LUKS" ]; then
+    CRYPT="1"
+    DEVICE_CHILD="$(readlink -f "${CRYPT_PARTITION}")"
+    echo "[INFO] Data partition is encrypted (${DEVICE_CHILD}), growing it before unlock"
+else
+    DEVICE_CHILD="$(findfs LABEL="hassos-data")"
 fi
 
 DEVICE_CHILD_NAME="$(basename "${DEVICE_CHILD}")"
 DEVICE_ROOT_NAME="$(lsblk -no pkname "${DEVICE_CHILD}")"
-if [ -n "${CRYPT_NAME}" ]; then
-    # With an open dm-crypt mapping lsblk also lists the child device, so
-    # take the parent disk from sysfs instead.
-    DEVICE_ROOT_NAME="$(basename "$(readlink -f "/sys/class/block/${DEVICE_CHILD_NAME}/..")")"
-fi
 DEVICE_ROOT="/dev/${DEVICE_ROOT_NAME}"
 PART_NUM="$(cat "/sys/class/block/${DEVICE_CHILD_NAME}/partition")"
 
@@ -79,17 +70,15 @@ sfdisk -V "${DEVICE_ROOT}"
 partx -u "${DEVICE_ROOT}"
 udevadm settle
 
-if [ -n "${CRYPT_NAME}" ]; then
-    # Grow the dm-crypt mapping to the new partition size. With LUKS2 the
-    # volume key is in the kernel keyring, so no key is needed here.
-    echo "[INFO] Resize dm-crypt mapping hassos-data"
-    cryptsetup resize "${CRYPT_NAME}"
-fi
 
 # Make sure /dev/disk/by-label/hassos-data is actually present before exiting.
 # This avoids a race condition with mnt-data.mount which might fail to bind
 # otherwise:
 # Bound to unit dev-disk-by\x2dlabel-hassos\x2ddata.device, but unit isn't active.
+if [ -n "${CRYPT}" ]; then
+    echo "[INFO] Finished hassos-data partition resizing (encrypted)"
+    exit 0
+fi
 if ! systemctl start "dev-disk-by\\x2dlabel-hassos\\x2ddata.device"; then
     echo "[ERROR] Data partition not found!"
     exit 1
