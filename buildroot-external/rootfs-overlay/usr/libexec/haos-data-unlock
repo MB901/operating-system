@@ -128,6 +128,9 @@ fetch_key() {
 KEY_FILE="${RUN_DIR}/key"
 convert_data() {
     t0="$(date +%s)"
+    # cryptsetup reencrypt writes a temporary header file in the current
+    # directory; / is the read-only erofs root.
+    cd "${RUN_DIR}" || return 1
     if [ "${CONVERT}" = "encrypt" ]; then
         echo "[INFO] Converting ${DEVICE} to LUKS2 in place, this can take a long time"
         e2fsck -fy "${DEVICE}"

@@ -24,8 +24,12 @@ if [ "$(lsblk -dno TYPE "${DEVICE_CHILD}")" = "crypt" ]; then
 fi
 
 DEVICE_CHILD_NAME="$(basename "${DEVICE_CHILD}")"
-# head: with an open dm-crypt mapping, lsblk also lists the child device
-DEVICE_ROOT_NAME="$(lsblk -no pkname "${DEVICE_CHILD}" | head -n 1)"
+DEVICE_ROOT_NAME="$(lsblk -no pkname "${DEVICE_CHILD}")"
+if [ -n "${CRYPT_NAME}" ]; then
+    # With an open dm-crypt mapping lsblk also lists the child device, so
+    # take the parent disk from sysfs instead.
+    DEVICE_ROOT_NAME="$(basename "$(readlink -f "/sys/class/block/${DEVICE_CHILD_NAME}/..")")"
+fi
 DEVICE_ROOT="/dev/${DEVICE_ROOT_NAME}"
 PART_NUM="$(cat "/sys/class/block/${DEVICE_CHILD_NAME}/partition")"
 
