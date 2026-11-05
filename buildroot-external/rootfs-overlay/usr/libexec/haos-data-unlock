@@ -1,0 +1,96 @@
+#!/bin/sh
+# ==============================================================================
+# HAOS encrypted data partition unlock (PROTOTYPE)
+#
+# Fetches the LUKS2 key of the data partition from a key server on the
+# local network over HTTPS and passes it to cryptsetup on stdin. The key is
+# never written to disk.
+#
+# Configuration, on the (unencrypted) overlay partition:
+#   /mnt/overlay/etc/haos-data-crypt/key-url  https URL returning the raw key
+#   /mnt/overlay/etc/haos-data-crypt/ca.pem   CA (or self-signed cert) that
+#                                             signs the key server certificate
+#   /mnt/overlay/etc/haos-data-crypt/token    bearer token sent to the server
+#
+# The script retries forever: the key server may come back after this
+# machine (power cut), and failing here must never lead to a wipe.
+# ==============================================================================
+set -u
+
+CONF_DIR="/mnt/overlay/etc/haos-data-crypt"
+DEVICE="/dev/disk/by-partlabel/hassos-data"
+NAME="hassos-data"
+# Keyslot holding the network key. Trying only this slot avoids paying the
+# (deliberately expensive) PBKDF of the recovery passphrase slot every boot.
+KEY_SLOT="0"
+
+DELAY_MIN=5
+DELAY_MAX=60
+
+if [ -b "/dev/mapper/${NAME}" ]; then
+    echo "[INFO] Data partition already unlocked"
+    exit 0
+fi
+
+if ! cryptsetup isLuks --type luks2 "${DEVICE}"; then
+    echo "[ERROR] ${DEVICE} is not a LUKS2 device, refusing to continue"
+    exit 1
+fi
+
+for f in key-url ca.pem token; do
+    if [ ! -s "${CONF_DIR}/${f}" ]; then
+        echo "[ERROR] Missing ${CONF_DIR}/${f}"
+        exit 1
+    fi
+done
+
+if ! head -n 1 "${CONF_DIR}/token" | grep -qE '^[A-Za-z0-9._~+/=-]+$'; then
+    echo "[ERROR] token contains unsupported characters"
+    exit 1
+fi
+
+KEY_URL="$(head -n 1 "${CONF_DIR}/key-url")"
+case "${KEY_URL}" in
+    https://*) ;;
+    *)
+        echo "[ERROR] key-url must be an https:// URL"
+        exit 1
+        ;;
+esac
+
+modprobe -q dm-crypt || true
+
+attempt=0
+delay="${DELAY_MIN}"
+while true; do
+    attempt=$((attempt + 1))
+
+    # Someone may have opened the volume by hand in the meantime, e.g. with
+    # the recovery passphrase from the console while the key server is gone.
+    if [ -b "/dev/mapper/${NAME}" ]; then
+        echo "[INFO] Data partition was unlocked by other means"
+        exit 0
+    fi
+
+    # The token is passed through a curl config on stdin so it does not
+    # appear on the command line (visible in ps). The key is piped straight
+    # into cryptsetup.
+    if printf 'header = "Authorization: Bearer %s"\n' "$(head -n 1 "${CONF_DIR}/token")" \
+        | curl --config - --silent --show-error --fail \
+            --proto '=https' --tlsv1.2 --cacert "${CONF_DIR}/ca.pem" \
+            --connect-timeout 10 --max-time 30 "${KEY_URL}" \
+        | cryptsetup open --type luks2 --key-slot "${KEY_SLOT}" \
+            --key-file=- "${DEVICE}" "${NAME}"; then
+        if [ -b "/dev/mapper/${NAME}" ]; then
+            echo "[INFO] Data partition unlocked (attempt ${attempt})"
+            exit 0
+        fi
+    fi
+
+    echo "[WARN] Unlock attempt ${attempt} failed, retrying in ${delay}s"
+    sleep "${delay}"
+    delay=$((delay * 2))
+    if [ "${delay}" -gt "${DELAY_MAX}" ]; then
+        delay="${DELAY_MAX}"
+    fi
+done

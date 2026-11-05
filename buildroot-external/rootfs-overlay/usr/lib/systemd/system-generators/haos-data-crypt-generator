@@ -1,0 +1,133 @@
+#!/bin/sh
+# ==============================================================================
+# HAOS encrypted data partition generator (PROTOTYPE)
+#
+# Only active when "haos.data-crypt=1" is on the kernel command line
+# (cmdline.txt on the boot partition). Without it, this generator does
+# nothing and the boot is unchanged.
+#
+# The key of the LUKS2 data partition is fetched from the network, so the
+# partition can only be opened after network-online.target. In the stock
+# boot, /mnt/data and the units that use it are ordered before
+# local-fs.target / sysinit.target, which would create ordering cycles.
+# This generator writes replacement units into the "early" generator
+# directory (which takes precedence over /etc and /usr) that move
+# /mnt/data and its direct consumers after the unlock step.
+# ==============================================================================
+
+EARLY_DIR="${2:-/run/systemd/generator.early}"
+
+grep -qw "haos.data-crypt=1" /proc/cmdline || exit 0
+
+mkdir -p "${EARLY_DIR}"
+
+# The mapper and label devices only appear once the key has been fetched,
+# which may take any amount of time (key server down after a power cut).
+# Do not let the default device timeout (90s) fail the mount for good.
+for dev in 'dev-mapper-hassos\x2ddata.device' 'dev-disk-by\x2dlabel-hassos\x2ddata.device'; do
+    mkdir -p "${EARLY_DIR}/${dev}.d"
+    cat > "${EARLY_DIR}/${dev}.d/50-haos-data-crypt.conf" <<EOF
+[Unit]
+JobRunningTimeoutSec=infinity
+EOF
+done
+
+cat > "${EARLY_DIR}/mnt-data.mount" <<'EOF'
+[Unit]
+Description=HAOS data partition (encrypted)
+DefaultDependencies=no
+Requires=haos-data-unlock.service
+After=haos-data-unlock.service haos-expand.service
+Wants=haos-expand.service systemd-growfs@mnt-data.service
+Wants=systemd-fsck@dev-mapper-hassos\x2ddata.service
+After=systemd-fsck@dev-mapper-hassos\x2ddata.service
+Conflicts=umount.target
+Before=umount.target
+
+[Mount]
+What=/dev/mapper/hassos-data
+Where=/mnt/data
+Type=ext4
+Options=commit=30
+EOF
+
+# Stock template instance is ordered Before=local-fs.target.
+cat > "${EARLY_DIR}/systemd-growfs@mnt-data.service" <<'EOF'
+[Unit]
+Description=Grow File System on /mnt/data
+DefaultDependencies=no
+BindsTo=mnt-data.mount
+After=mnt-data.mount
+Conflicts=shutdown.target
+Before=shutdown.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/systemd/systemd-growfs /mnt/data
+TimeoutSec=0
+EOF
+
+# Stock unit is wanted by haos-bind.target (ordered Before=sysinit.target).
+cat > "${EARLY_DIR}/var-log-journal.mount" <<'EOF'
+[Unit]
+Description=Systemd persistent logging (encrypted data)
+DefaultDependencies=no
+Requires=mnt-data.mount
+After=mnt-data.mount
+Conflicts=umount.target
+Before=umount.target
+
+[Mount]
+What=/mnt/data/logs
+Where=/var/log/journal
+Type=None
+Options=bind
+LazyUnmount=yes
+EOF
+
+cat > "${EARLY_DIR}/var-lib-docker.mount" <<'EOF'
+[Unit]
+Description=Docker persistent data (encrypted data)
+DefaultDependencies=no
+Requires=mnt-data.mount
+After=mnt-data.mount
+Before=docker.service containerd.service
+Conflicts=umount.target
+Before=umount.target
+
+[Mount]
+What=/mnt/data/docker
+Where=/var/lib/docker
+Type=none
+Options=bind
+EOF
+
+# Stock swap unit gets Before=swap.target (and so Before=sysinit.target).
+cat > "${EARLY_DIR}/mnt-data-swapfile.swap" <<'EOF'
+[Unit]
+Description=HAOS swap file (encrypted data)
+DefaultDependencies=no
+ConditionFileNotEmpty=/mnt/data/swapfile
+Requires=mnt-data.mount
+After=mnt-data.mount haos-swapfile.service
+Conflicts=umount.target
+Before=umount.target
+
+[Swap]
+What=/mnt/data/swapfile
+EOF
+
+# containerd keeps its state below /mnt/data but has no mount dependency
+# in the stock image (it relies on /mnt/data being mounted before sysinit).
+mkdir -p "${EARLY_DIR}/containerd.service.d"
+cat > "${EARLY_DIR}/containerd.service.d/50-haos-data-crypt.conf" <<'EOF'
+[Unit]
+RequiresMountsFor=/mnt/data /var/lib/docker
+EOF
+
+# Things that normally happen during sysinit against /mnt/data:
+# tmpfiles (data.conf) and the journal flush to persistent storage.
+mkdir -p "${EARLY_DIR}/multi-user.target.wants"
+ln -sf /usr/lib/systemd/system/haos-data-crypt-post.service \
+    "${EARLY_DIR}/multi-user.target.wants/haos-data-crypt-post.service"

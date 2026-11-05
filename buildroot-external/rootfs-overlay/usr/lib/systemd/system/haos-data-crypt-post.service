@@ -1,0 +1,16 @@
+[Unit]
+Description=HAOS encrypted data partition post-mount setup
+Requires=var-log-journal.mount
+After=var-log-journal.mount
+Before=docker-prepare.service docker.service containerd.service haos-supervisor.service
+ConditionKernelCommandLine=haos.data-crypt=1
+RequiresMountsFor=/mnt/data
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# Re-apply the tmpfiles rules for /mnt/data (they ran before it was mounted)
+ExecStart=/usr/bin/systemd-tmpfiles --create --remove /etc/tmpfiles.d/data.conf
+# Move the journal written so far to the now-mounted persistent location
+ExecStart=/usr/bin/journalctl --relinquish-var
+ExecStart=/usr/bin/journalctl --flush
