@@ -15,7 +15,7 @@ import time
 
 class VM:
     def __init__(self, base_image: str, workdir: str, name: str, mem: str = "2048", smp: str = "4",
-                 disk_name: str | None = None):
+                 disk_name: str | None = None, extra_args: list[str] | None = None):
         self.workdir = workdir
         self.name = name
         # reuse an existing overlay (several boots of the same "machine")
@@ -36,7 +36,7 @@ class VM:
             "-nic", "user,model=virtio-net-pci",
             "-serial", f"unix:{self.sock},server=on,wait=on",
             "-display", "none", "-monitor", "none",
-        ], stdout=subprocess.DEVNULL, stderr=open(os.path.join(workdir, f"{name}.qemu.log"), "w"))
+        ] + (extra_args or []), stdout=subprocess.DEVNULL, stderr=open(os.path.join(workdir, f"{name}.qemu.log"), "w"))
         for _ in range(100):
             if os.path.exists(self.sock):
                 break

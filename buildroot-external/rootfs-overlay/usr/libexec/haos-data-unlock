@@ -22,6 +22,14 @@
 # typed on the console at any time while waiting: the prompt is shown by the
 # systemd console password agent, so a keyboard is never required.
 #
+# Conversion of an existing (plain ext4) installation: if the data partition
+# is not LUKS2 yet and "convert" exists in the configuration directory, the
+# partition is encrypted in place with "cryptsetup reencrypt --encrypt"
+# before being opened (the overlay is not touched). The filesystem is first
+# shrunk by 32 MiB to make room for the LUKS2 header. An interrupted
+# conversion (power cut) is resumed on the next boot. An optional
+# "recovery-passphrase" file is added to keyslot 1 and then deleted.
+#
 # The script retries forever: the key server may come back after this
 # machine (power cut), and failing here must never lead to a wipe.
 # ==============================================================================
@@ -46,9 +54,18 @@ if unlocked; then
     exit 0
 fi
 
+CONVERT=""
 if ! cryptsetup isLuks --type luks2 "${DEVICE}"; then
-    echo "[ERROR] ${DEVICE} is not a LUKS2 device, refusing to continue"
-    exit 1
+    if [ -e "${CONF_DIR}/convert" ] && \
+        [ "$(blkid -s TYPE -o value "${DEVICE}")" = "ext4" ] && \
+        [ "$(blkid -s LABEL -o value "${DEVICE}")" = "hassos-data" ]; then
+        CONVERT="encrypt"
+    else
+        echo "[ERROR] ${DEVICE} is not a LUKS2 device, refusing to continue"
+        exit 1
+    fi
+elif cryptsetup luksDump "${DEVICE}" | grep -q "online-reencrypt"; then
+    CONVERT="resume"
 fi
 
 if [ -s "${CONF_DIR}/key.jwe" ]; then
@@ -104,6 +121,67 @@ fetch_key() {
             ;;
     esac
 }
+
+# In-place conversion of the plain data partition (or resume of an
+# interrupted one). The key is kept in RAM (/run is a tmpfs) for the time
+# of the conversion only.
+KEY_FILE="${RUN_DIR}/key"
+convert_data() {
+    t0="$(date +%s)"
+    if [ "${CONVERT}" = "encrypt" ]; then
+        echo "[INFO] Converting ${DEVICE} to LUKS2 in place, this can take a long time"
+        e2fsck -fy "${DEVICE}"
+        rc=$?
+        if [ "${rc}" -gt 1 ]; then
+            echo "[ERROR] e2fsck failed (${rc}), not converting"
+            return 1
+        fi
+        size="$(blockdev --getsize64 "${DEVICE}")"
+        if ! resize2fs "${DEVICE}" "$(( (size - 32 * 1024 * 1024) / 1024 ))K"; then
+            echo "[ERROR] Cannot shrink the filesystem by 32 MiB, not converting"
+            return 1
+        fi
+        cryptsetup reencrypt --encrypt -q --type luks2 --cipher aes-xts-plain64 \
+            --key-size 512 --sector-size 512 --pbkdf pbkdf2 --pbkdf-force-iterations 1000 \
+            --key-slot "${NET_KEY_SLOT}" --reduce-device-size 32M \
+            --key-file "${KEY_FILE}" "${DEVICE}" || return 1
+    else
+        echo "[INFO] Resuming interrupted conversion of ${DEVICE}"
+        cryptsetup reencrypt --resume-only -q --key-slot "${NET_KEY_SLOT}" \
+            --key-file "${KEY_FILE}" "${DEVICE}" || return 1
+    fi
+    if [ -s "${CONF_DIR}/recovery-passphrase" ]; then
+        # same bytes as typed on the console: first line, no newline
+        (umask 077; printf '%s' "$(head -n 1 "${CONF_DIR}/recovery-passphrase")" > "${RUN_DIR}/recovery")
+        cryptsetup luksAddKey -q --key-file "${KEY_FILE}" --key-slot "${RECOVERY_KEY_SLOT}" \
+            --pbkdf argon2id "${DEVICE}" "${RUN_DIR}/recovery" \
+            && shred -u "${CONF_DIR}/recovery-passphrase"
+        shred -u "${RUN_DIR}/recovery"
+    fi
+    rm -f "${CONF_DIR}/convert"
+    echo "[INFO] Conversion finished in $(( $(date +%s) - t0 ))s"
+}
+
+if [ -n "${CONVERT}" ]; then
+    (umask 077; : > "${KEY_FILE}")
+    delay="${DELAY_MIN}"
+    until fetch_key > "${KEY_FILE}" && [ -s "${KEY_FILE}" ]; do
+        echo "[WARN] Cannot get the ${PROVIDER} key for the conversion, retrying in ${delay}s"
+        sleep "${delay}"
+        delay=$((delay * 2))
+        [ "${delay}" -gt "${DELAY_MAX}" ] && delay="${DELAY_MAX}"
+    done
+    if ! convert_data; then
+        shred -u "${KEY_FILE}"
+        echo "[ERROR] Conversion failed, the data partition is left as it is"
+        exit 1
+    fi
+    cryptsetup open --type luks2 --key-slot "${NET_KEY_SLOT}" \
+        --key-file "${KEY_FILE}" "${DEVICE}" "${NAME}"
+    rc=$?
+    shred -u "${KEY_FILE}"
+    exit "${rc}"
+fi
 
 # Recovery passphrase prompt on the console, in parallel with the network
 # attempts. Whoever opens the volume first wins.

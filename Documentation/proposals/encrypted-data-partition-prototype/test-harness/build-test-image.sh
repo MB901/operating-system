@@ -16,6 +16,9 @@
 #   KEY_JWE=<file>       put <file> on the overlay as key.jwe (Tang provider)
 #                        instead of the HTTPS configuration
 #   SYSTEM0_IMAGE=<file> reuse an already built rootfs image (skips step 2)
+#   OFFICIAL_ROOTFS=1    keep the release rootfs untouched (skips step 2)
+#   PLAIN=1              keep the data partition plain and the overlay empty,
+#                        no haos.data-crypt=1 (an "existing installation")
 #   modules-dir: contains dm-crypt.ko xts.ko essiv.ko for the release kernel
 #   keys-dir:    output of key-server.py --init (net.key, ca.pem, token, url)
 # Requires: root, sgdisk, erofs-utils, cryptsetup, mtools, e2fsprogs, kmod,
@@ -47,7 +50,9 @@ cp --sparse=always "${SRC_IMG}" "${OUT_IMG}"
 P_BOOT=1 P_SYSTEM0=3 P_OVERLAY=7 P_DATA=8
 
 echo "[2/6] Rebuild rootfs (system0) with modules and prototype files"
-if [ -n "${SYSTEM0_IMAGE:-}" ]; then
+if [ "${OFFICIAL_ROOTFS:-0}" = "1" ]; then
+    echo "    keeping the release rootfs"
+elif [ -n "${SYSTEM0_IMAGE:-}" ]; then
     echo "    reusing ${SYSTEM0_IMAGE}"
     cp "${SYSTEM0_IMAGE}" "${WORK}/system0.new"
 else
@@ -74,6 +79,19 @@ else
         CLEVIS_FILES="/usr/bin/clevis /usr/bin/clevis-decrypt /usr/bin/clevis-decrypt-tang
             /usr/bin/clevis-decrypt-sss /usr/bin/jose
             /usr/lib/x86_64-linux-gnu/libjose.so.0 /usr/lib/x86_64-linux-gnu/libjansson.so.4"
+        # clevis is written for GNU bash; /bin/bash in HAOS is busybox ash
+        # (CONFIG_BASH_IS_ASH). Ship GNU bash (and libtinfo, which the HAOS
+        # ncurses build does not provide) in a private directory and point
+        # the clevis scripts to it, without touching /bin/bash.
+        install -D -m 0755 /usr/bin/bash "${WORK}/rootfs/usr/lib/clevis-test/bash"
+        install -D -m 0644 "$(readlink -f /usr/lib/x86_64-linux-gnu/libtinfo.so.6)" "${WORK}/rootfs/usr/lib/libtinfo.so.6"
+        for f in clevis clevis-decrypt clevis-decrypt-tang clevis-decrypt-sss; do
+            sed -i '1 s|^#!/bin/bash|#!/usr/lib/clevis-test/bash|' "${WORK}/rootfs/usr/bin/${f}"
+        done
+        echo "    GNU bash + libtinfo for clevis: $(du -cb /usr/bin/bash "$(readlink -f /usr/lib/x86_64-linux-gnu/libtinfo.so.6)" | tail -n 1 | cut -f1) bytes uncompressed"
+        # resize2fs is not in the HAOS image (BR2_PACKAGE_E2FSPROGS_RESIZE2FS
+        # is not set); the in-place conversion needs it to shrink ext4.
+        install -D -m 0755 /usr/sbin/resize2fs "${WORK}/rootfs/usr/sbin/resize2fs"
         # shellcheck disable=SC2086
         for f in ${CLEVIS_FILES}; do
             case "${f}" in
@@ -93,55 +111,61 @@ else
     cp "${WORK}/system0.new" "${OUT_IMG%.img}.system0.erofs"
     echo "    rootfs image: $(stat -c %s "${WORK}/system0.new") bytes (saved as ${OUT_IMG%.img}.system0.erofs)"
 fi
-inject "${P_SYSTEM0}" "${WORK}/system0.new"
+[ "${OFFICIAL_ROOTFS:-0}" = "1" ] || inject "${P_SYSTEM0}" "${WORK}/system0.new"
 
-echo "[3/6] Convert data partition to LUKS2"
-extract "${P_DATA}" "${WORK}/data.ext4"
-LUKS_OFFSET=$((16 * 1024 * 1024))
-# The release ext4 is already at its minimum size, so make room for the
-# LUKS2 header by growing the partition by LUKS_OFFSET (same start, name,
-# type and PARTUUID). The rest of the disk is left for haos-expand.
-qemu-img resize -q -f raw "${OUT_IMG}" "${DISK_SIZE}"
-sgdisk -e "${OUT_IMG}" > /dev/null
-D_START="$(part_start ${P_DATA})"
-D_SIZE="$(part_size ${P_DATA})"
-D_GUID="$(sgdisk -i ${P_DATA} "${OUT_IMG}" | awk '/unique GUID/ {print $4}')"
-D_TYPE="$(sgdisk -i ${P_DATA} "${OUT_IMG}" | awk '/Partition GUID code/ {print $4}')"
-sgdisk -d ${P_DATA} \
-    -n ${P_DATA}:"${D_START}":$(( D_START + D_SIZE + LUKS_OFFSET / 512 - 1 )) \
-    -c ${P_DATA}:hassos-data -t ${P_DATA}:"${D_TYPE}" -u ${P_DATA}:"${D_GUID}" \
-    "${OUT_IMG}" > /dev/null
-DATA_BYTES="$(( $(part_size ${P_DATA}) * 512 ))"
-truncate -s "${DATA_BYTES}" "${WORK}/data.luks"
-# Slot 0: random network key (high entropy, cheap PBKDF is fine).
-cryptsetup luksFormat -q --type luks2 --cipher aes-xts-plain64 --key-size 512 \
-    --sector-size 512 --offset $((LUKS_OFFSET / 512)) \
-    --pbkdf pbkdf2 --pbkdf-force-iterations 1000 \
-    --key-slot 0 --key-file "${KEYS_DIR}/net.key" "${WORK}/data.luks"
-# Slot 1: recovery passphrase (memory-hard PBKDF; reduced here for a TCG VM).
-printf '%s' "${RECOVERY_PASSPHRASE}" > "${WORK}/recovery"
-cryptsetup luksAddKey -q --key-file "${KEYS_DIR}/net.key" --key-slot 1 \
-    --pbkdf argon2id --pbkdf-memory 65536 --pbkdf-force-iterations 4 --pbkdf-parallel 1 \
-    "${WORK}/data.luks" "${WORK}/recovery"
-cryptsetup luksDump -q --dump-volume-key --volume-key-file "${WORK}/vk" \
-    --key-file "${KEYS_DIR}/net.key" "${WORK}/data.luks" > /dev/null
-python3 "${HERE}/luks_encrypt_offline.py" "${WORK}/data.ext4" "${WORK}/data.luks" \
-    "${WORK}/vk" "${LUKS_OFFSET}"
-shred -u "${WORK}/vk"
-inject "${P_DATA}" "${WORK}/data.luks"
+if [ "${PLAIN:-0}" = "1" ]; then
+    echo "[3/6] PLAIN=1: data partition left as in the release"
+    qemu-img resize -q -f raw "${OUT_IMG}" "${DISK_SIZE}"
+    sgdisk -e "${OUT_IMG}" > /dev/null
+    echo "[4/6] PLAIN=1: overlay left empty"
+else
+    echo "[3/6] Convert data partition to LUKS2"
+    extract "${P_DATA}" "${WORK}/data.ext4"
+    LUKS_OFFSET=$((16 * 1024 * 1024))
+    # The release ext4 is already at its minimum size, so make room for the
+    # LUKS2 header by growing the partition by LUKS_OFFSET (same start, name,
+    # type and PARTUUID). The rest of the disk is left for haos-expand.
+    qemu-img resize -q -f raw "${OUT_IMG}" "${DISK_SIZE}"
+    sgdisk -e "${OUT_IMG}" > /dev/null
+    D_START="$(part_start ${P_DATA})"
+    D_SIZE="$(part_size ${P_DATA})"
+    D_GUID="$(sgdisk -i ${P_DATA} "${OUT_IMG}" | awk '/unique GUID/ {print $4}')"
+    D_TYPE="$(sgdisk -i ${P_DATA} "${OUT_IMG}" | awk '/Partition GUID code/ {print $4}')"
+    sgdisk -d ${P_DATA} \
+        -n ${P_DATA}:"${D_START}":$(( D_START + D_SIZE + LUKS_OFFSET / 512 - 1 )) \
+        -c ${P_DATA}:hassos-data -t ${P_DATA}:"${D_TYPE}" -u ${P_DATA}:"${D_GUID}" \
+        "${OUT_IMG}" > /dev/null
+    DATA_BYTES="$(( $(part_size ${P_DATA}) * 512 ))"
+    truncate -s "${DATA_BYTES}" "${WORK}/data.luks"
+    # Slot 0: random network key (high entropy, cheap PBKDF is fine).
+    cryptsetup luksFormat -q --type luks2 --cipher aes-xts-plain64 --key-size 512 \
+        --sector-size 512 --offset $((LUKS_OFFSET / 512)) \
+        --pbkdf pbkdf2 --pbkdf-force-iterations 1000 \
+        --key-slot 0 --key-file "${KEYS_DIR}/net.key" "${WORK}/data.luks"
+    # Slot 1: recovery passphrase (memory-hard PBKDF; reduced here for a TCG VM).
+    printf '%s' "${RECOVERY_PASSPHRASE}" > "${WORK}/recovery"
+    cryptsetup luksAddKey -q --key-file "${KEYS_DIR}/net.key" --key-slot 1 \
+        --pbkdf argon2id --pbkdf-memory 65536 --pbkdf-force-iterations 4 --pbkdf-parallel 1 \
+        "${WORK}/data.luks" "${WORK}/recovery"
+    cryptsetup luksDump -q --dump-volume-key --volume-key-file "${WORK}/vk" \
+        --key-file "${KEYS_DIR}/net.key" "${WORK}/data.luks" > /dev/null
+    python3 "${HERE}/luks_encrypt_offline.py" "${WORK}/data.ext4" "${WORK}/data.luks" \
+        "${WORK}/vk" "${LUKS_OFFSET}"
+    shred -u "${WORK}/vk"
+    inject "${P_DATA}" "${WORK}/data.luks"
 
-echo "[4/6] Unlock configuration on overlay"
-extract "${P_OVERLAY}" "${WORK}/overlay.ext4"
-if [ -n "${KEY_JWE:-}" ]; then
-    cat > "${WORK}/debugfs.cmd" <<EOF
+    echo "[4/6] Unlock configuration on overlay"
+    extract "${P_OVERLAY}" "${WORK}/overlay.ext4"
+    if [ -n "${KEY_JWE:-}" ]; then
+        cat > "${WORK}/debugfs.cmd" <<EOF
 mkdir etc
 mkdir etc/haos-data-crypt
 write $(realpath "${KEY_JWE}") etc/haos-data-crypt/key.jwe
 sif etc/haos-data-crypt mode 040700
 sif etc/haos-data-crypt/key.jwe mode 0100600
 EOF
-else
-    cat > "${WORK}/debugfs.cmd" <<EOF
+    else
+        cat > "${WORK}/debugfs.cmd" <<EOF
 mkdir etc
 mkdir etc/haos-data-crypt
 write ${KEYS_DIR}/url etc/haos-data-crypt/key-url
@@ -152,14 +176,18 @@ sif etc/haos-data-crypt/token mode 0100600
 sif etc/haos-data-crypt/key-url mode 0100644
 sif etc/haos-data-crypt/ca.pem mode 0100644
 EOF
+    fi
+    debugfs -w -f "${WORK}/debugfs.cmd" "${WORK}/overlay.ext4" > /dev/null 2>&1
+    inject "${P_OVERLAY}" "${WORK}/overlay.ext4"
+
 fi
-debugfs -w -f "${WORK}/debugfs.cmd" "${WORK}/overlay.ext4" > /dev/null 2>&1
-inject "${P_OVERLAY}" "${WORK}/overlay.ext4"
 
 echo "[5/6] Kernel command line"
 extract "${P_BOOT}" "${WORK}/boot.vfat"
 mcopy -o -i "${WORK}/boot.vfat" ::cmdline.txt "${WORK}/cmdline.txt"
-if ! grep -q "haos.data-crypt=1" "${WORK}/cmdline.txt"; then
+if [ "${PLAIN:-0}" = "1" ]; then
+    sed -i '1 s/$/ console=ttyS0/' "${WORK}/cmdline.txt"
+elif ! grep -q "haos.data-crypt=1" "${WORK}/cmdline.txt"; then
     sed -i '1 s/$/ console=ttyS0 haos.data-crypt=1/' "${WORK}/cmdline.txt"
 fi
 mcopy -o -i "${WORK}/boot.vfat" "${WORK}/cmdline.txt" ::cmdline.txt

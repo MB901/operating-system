@@ -11,6 +11,14 @@ Scenarios:
               the recovery passphrase typed on the console unblocks the boot
   control     image WITHOUT haos.data-crypt=1 and with a plain data partition
               (same rootfs): the boot must be the stock one
+  compare     dump active units / timings of the image (run it on the
+              untouched release image and on the prototype rootfs)
+  locked-reboots  3 power cuts while waiting for the key, then key back
+  migrate     plain installation -> test data, SSH key, Wi-Fi profile and a
+              full backup -> enable encryption -> in-place conversion by
+              haos-data-unlock, power cut in the middle, resume -> checks
+  wipe        haos.wipe=1 on an encrypted system
+  tang        Tang provider (keys-dir is then the Tang key directory)
 
 Results are printed and appended to <workdir>/results.md.
 """
@@ -267,7 +275,177 @@ def scenario_tang(img, keys, workdir):
     report(workdir, REPORT_TITLE, lines)
 
 
-SCENARIOS = {"tang": scenario_tang, "control": scenario_control, "locked-reboots": scenario_locked_reboots, "key-ok": scenario_key_ok, "key-late": scenario_key_late, "key-denied": scenario_key_denied}
+CANARY = "PLAINTEXT-CANARY-5e1b7c"
+DATA_PART_START = 1427456  # sector of hassos-data in the generic-x86-64 layout
+
+
+def scan_data_partition(disk: str, workdir: str, pattern: str) -> int:
+    """Count lines containing pattern in the data partition of a stopped VM disk."""
+    raw = os.path.join(workdir, "data-part.raw")
+    subprocess.run(["qemu-img", "dd", "-f", "qcow2", "-O", "raw", "bs=512", f"skip={DATA_PART_START}",
+                    f"if={disk}", f"of={raw}"], check=True)
+    out = subprocess.run(["grep", "-c", "-a", pattern, raw], capture_output=True, text=True).stdout.strip()
+    os.unlink(raw)
+    return int(out or 0)
+
+
+def b64_file_cmd(src: str, dst: str, mode: str) -> str:
+    import base64
+    data = base64.b64encode(open(src, "rb").read()).decode()
+    return f"echo {data} | base64 -d > {dst} && chmod {mode} {dst}"
+
+
+OVERLAY_SUMS = ("cd /mnt/overlay && sha256sum root/.ssh/authorized_keys etc/hostname etc/dropbear/* "
+                "etc/NetworkManager/system-connections/* | sort -k2")
+DATA_SUMS = "sha256sum /mnt/data/supervisor/share/canary.txt /mnt/data/supervisor/share/random.bin"
+
+
+def scenario_migrate(img, keys, workdir):
+    lines = []
+    disk = os.path.join(workdir, "migrate.qcow2")
+    # --- boot 1: plain installation, create data, backup, enable encryption
+    vm = VM(img, workdir, "migrate-boot1", disk_name="migrate")
+    try:
+        vm.login()
+        vm.wait_cmd("systemctl is-active -q mnt-data.mount docker.service", 1200)
+        vm.run("mkdir -p /mnt/data/supervisor/share && "
+               f"for i in $(seq 1 20000); do echo '{CANARY} line $i'; done > /mnt/data/supervisor/share/canary.txt && "
+               "dd if=/dev/urandom of=/mnt/data/supervisor/share/random.bin bs=1M count=64 status=none && sync", 600)
+        vm.run("mkdir -p /root/.ssh && echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMigrationTestKeyOnly test@harness' "
+               ">> /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys")
+        vm.run("printf '[connection]\\nid=canary-wifi\\ntype=wifi\\nautoconnect=false\\n[wifi]\\nssid=canary\\n"
+               "[wifi-security]\\nkey-mgmt=wpa-psk\\npsk=canary-psk-12345\\n' "
+               "> /etc/NetworkManager/system-connections/canary-wifi.nmconnection && "
+               "chmod 600 /etc/NetworkManager/system-connections/canary-wifi.nmconnection && nmcli con reload")
+        _, ov_before = vm.run(OVERLAY_SUMS)
+        _, data_before = vm.run(DATA_SUMS)
+        _, lsblk1 = vm.run("lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL /dev/vda8; df -h /mnt/data | tail -n 1")
+        sup = vm.wait_cmd("docker exec hassio_cli ha supervisor info >/dev/null 2>&1", 1200, 30)
+        rc, bk = vm.run("docker exec hassio_cli ha backups new --name before-encryption --raw-json 2>&1 | tail -c 600", 1800)
+        _, bklist = vm.run("docker exec hassio_cli ha backups list --raw-json 2>&1 | tail -c 800; ls -la /mnt/data/supervisor/backup/")
+        lines += [f"### boot 1 (plain): data partition\n```\n{lsblk1.strip()}\n```",
+                  f"### boot 1: overlay checksums\n```\n{ov_before.strip()}\n```",
+                  f"### boot 1: test data checksums\n```\n{data_before.strip()}\n```",
+                  f"- Supervisor CLI reachable: {sup}",
+                  f"### boot 1: full backup (rc={rc})\n```\n{bk.strip()}\n{bklist.strip()}\n```"]
+        # enable encryption: unlock config on the overlay, conversion marker, flag
+        for f, mode in (("url", "644"), ("ca.pem", "644"), ("token", "600")):
+            dst = "key-url" if f == "url" else f
+            vm.run("mkdir -p /mnt/overlay/etc/haos-data-crypt && chmod 700 /mnt/overlay/etc/haos-data-crypt && "
+                   + b64_file_cmd(os.path.join(keys, f), f"/mnt/overlay/etc/haos-data-crypt/{dst}", mode))
+        vm.run(f"touch /mnt/overlay/etc/haos-data-crypt/convert && printf '%s\\n' '{RECOVERY}' "
+               "> /mnt/overlay/etc/haos-data-crypt/recovery-passphrase && chmod 600 /mnt/overlay/etc/haos-data-crypt/recovery-passphrase && "
+               "sed -i '1 s/$/ haos.data-crypt=1/' /mnt/boot/cmdline.txt && sync")
+        _, cmd = vm.run("cat /mnt/boot/cmdline.txt; ls -la /mnt/overlay/etc/haos-data-crypt")
+        lines.append(f"### boot 1: encryption enabled\n```\n{cmd.strip()}\n```")
+    finally:
+        vm.stop()
+    lines.append(f"- canary lines in the data partition after boot 1 (plain): **{scan_data_partition(disk, workdir, CANARY)}**")
+
+    srv = KeyServer(keys, workdir)
+    try:
+        # --- boot 2: conversion starts, power cut in the middle
+        vm = VM(img, workdir, "migrate-boot2", disk_name="migrate")
+        vm.expect(r"Starting .*HAOS data partition unlock", 900)
+        t_start = vm.elapsed()
+        time.sleep(40)
+        done = vm.seen(r"Finished .*HAOS data partition unlock", 1)
+        vm.power_cut()
+        lines.append(f"- boot 2: unlock/conversion started at {t_start:.0f}s, **power cut** 40 s later "
+                     f"(conversion already finished: {done})")
+        # --- boot 3: resume, then checks
+        vm = VM(img, workdir, "migrate-boot3", disk_name="migrate")
+        t_login = vm.login(1800)
+        ok = vm.wait_cmd("systemctl is-active -q mnt-data.mount docker.service", 1200)
+        lines.append(f"- boot 3: console login at {t_login:.0f}s, data+docker active: **{ok}**")
+        for name, cmd in [
+            ("unlock / conversion log", "journalctl -b -u haos-data-unlock --no-pager -o short-monotonic | tail -n 25"),
+            ("LUKS2 header", "cryptsetup luksDump /dev/vda8 | grep -E 'Version|Requirements|Keyslots|^  [0-9]: |PBKDF|offset:|length:'"),
+            ("block devices", "lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL,MOUNTPOINTS /dev/vda8; df -h /mnt/data | tail -n 1"),
+            ("overlay checksums (must match boot 1)", OVERLAY_SUMS),
+            ("unlock config after conversion", "ls -la /mnt/overlay/etc/haos-data-crypt"),
+            ("network profile and SSH key", "nmcli -t -f NAME con show; grep -c MigrationTestKeyOnly /root/.ssh/authorized_keys"),
+            ("test data checksums (must match boot 1)", DATA_SUMS),
+            ("failed units", "systemctl --failed --no-legend --plain"),
+        ]:
+            rc, out = vm.run(cmd)
+            lines.append(f"### {name}\n```\n$ {cmd}\n{out.strip()}\n```")
+        sup = vm.wait_cmd("docker exec hassio_cli ha supervisor info >/dev/null 2>&1", 1200, 30)
+        _, bklist = vm.run("docker exec hassio_cli ha backups list --raw-json 2>&1 | tail -c 800")
+        lines.append(f"### backups after conversion (Supervisor CLI reachable: {sup})\n```\n{bklist.strip()}\n```")
+        # restore test: delete the share data, restore the "share" folder from the backup
+        rc, slug = vm.run("docker exec hassio_cli ha backups list --raw-json 2>/dev/null | "
+                          "grep -o '\"slug\": *\"[^\"]*\"' | head -n 1 | cut -d'\"' -f4")
+        slug = slug.strip()
+        if slug:
+            vm.run("rm -f /mnt/data/supervisor/share/canary.txt /mnt/data/supervisor/share/random.bin")
+            rc, rs = vm.run(f"docker exec hassio_cli ha backups restore {slug} --folders share --raw-json 2>&1 | tail -c 600", 1800)
+            time.sleep(10)
+            _, after = vm.run(DATA_SUMS)
+            lines.append(f"### restore of the share folder from backup {slug} (rc={rc})\n```\n{rs.strip()}\n{after.strip()}\n```")
+        else:
+            lines.append("- no backup slug found, restore not tested")
+        vm.stop()
+    finally:
+        srv.stop()
+    lines.append(f"- canary lines in the data partition after conversion: **{scan_data_partition(disk, workdir, CANARY)}** "
+                 "(expected 0)")
+    report(workdir, "Scenario migrate (plain installation -> LUKS2 in place, with a power cut)", lines)
+
+
+def scenario_wipe(img, keys, workdir):
+    lines = []
+    srv = KeyServer(keys, workdir)
+    try:
+        vm = VM(img, workdir, "wipe-boot1", disk_name="wipe")
+        vm.login()
+        vm.wait_cmd("systemctl is-active -q mnt-data.mount", 1200)
+        _, b = vm.run("lsblk -o NAME,TYPE,FSTYPE,LABEL /dev/vda8; sed -i '1 s/$/ haos.wipe=1/' /mnt/boot/cmdline.txt; "
+                      "cat /mnt/boot/cmdline.txt; sync")
+        lines.append(f"### boot 1 (encrypted), wipe requested\n```\n{b.strip()}\n```")
+        vm.stop()
+        for n in (2, 3):
+            vm = VM(img, workdir, f"wipe-boot{n}", disk_name="wipe")
+            t_login = vm.login(1800)
+            vm.wait_cmd("systemctl is-active -q mnt-data.mount", 600)
+            _, out = vm.run("cat /mnt/boot/cmdline.txt; blkid /dev/vda8; cryptsetup isLuks /dev/vda8 && echo LUKS || echo not-LUKS; "
+                            "findmnt -n -o SOURCE /mnt/data; ls -la /mnt/overlay/etc/haos-data-crypt 2>&1 | head -n 3; "
+                            "journalctl -b -u haos-wipe -u haos-data-unlock --no-pager -o cat | tail -n 12; "
+                            "journalctl -b --no-pager | grep -c 'not a LUKS2' ; systemctl --failed --no-legend --plain")
+            lines.append(f"### boot {n} (console login at {t_login:.0f}s)\n```\n{out.strip()}\n```")
+            vm.stop()
+    finally:
+        srv.stop()
+    report(workdir, "Scenario wipe (haos.wipe=1 on an encrypted system)", lines)
+
+
+def scenario_compare(img, keys, workdir):
+    name = "compare-" + os.path.basename(img).replace(".img", "")
+    vm = VM(img, workdir, name)
+    try:
+        t_login = vm.login()
+        vm.wait_cmd("systemctl is-active -q docker.service", 1200)
+        time.sleep(60)
+        _, units = vm.run("systemctl list-units --all --no-legend --plain --state=active,failed | awk '{print $1, $3}' | sort")
+        with open(os.path.join(workdir, f"{name}.units.txt"), "w") as f:
+            f.write(units)
+        _, order = vm.run("journalctl -b --no-pager -o short-monotonic | grep -E 'systemd\\[1\\]: (Mounted|Finished|Started|Reached target)' "
+                          "| sed -E 's/^\\[ *([0-9.]+)\\].*systemd\\[1\\]: /\\1 /'")
+        with open(os.path.join(workdir, f"{name}.order.txt"), "w") as f:
+            f.write(order)
+        _, t = vm.run("for u in mnt-overlay.mount mnt-data.mount haos-data-unlock.service sysinit.target basic.target "
+                      "network-online.target docker.service haos-supervisor.service multi-user.target; do "
+                      "echo \"$u $(systemctl show -P ActiveEnterTimestampMonotonic $u)\"; done; "
+                      "systemctl show -P UserspaceTimestampMonotonic; systemctl --failed --no-legend --plain; "
+                      "which systemd-analyze || echo 'systemd-analyze: not in the image'")
+        lines = [f"- console login at {t_login:.0f}s; units and order saved as {name}.units.txt / {name}.order.txt",
+                 f"```\n{t.strip()}\n```"]
+    finally:
+        vm.stop()
+    report(workdir, f"Scenario compare ({os.path.basename(img)})", lines)
+
+
+SCENARIOS = {"migrate": scenario_migrate, "wipe": scenario_wipe, "compare": scenario_compare, "tang": scenario_tang, "control": scenario_control, "locked-reboots": scenario_locked_reboots, "key-ok": scenario_key_ok, "key-late": scenario_key_late, "key-denied": scenario_key_denied}
 
 if __name__ == "__main__":
     img, keys, workdir = sys.argv[1:4]
