@@ -126,13 +126,14 @@ class VM:
             self.proc.wait(timeout=180)
         except Exception:
             self.proc.kill()
+            self.proc.wait()
         self.log.close()
 
 
 def read_grubenv(disk: str, workdir: str) -> str:
     """Read EFI/BOOT/grubenv from the boot partition of a (stopped) VM disk."""
     boot = os.path.join(workdir, "boot.vfat")
-    subprocess.run(["qemu-img", "dd", "-f", "qcow2", "-O", "raw", "bs=512", "skip=2048", "count=65536",
+    subprocess.run(["qemu-img", "dd", "-U", "-f", "qcow2", "-O", "raw", "bs=512", "skip=2048", "count=65536",
                     f"if={disk}", f"of={boot}"], check=True)
     out = subprocess.run(["mtype", "-i", boot, "::EFI/BOOT/grubenv"], capture_output=True, text=True).stdout
     os.unlink(boot)

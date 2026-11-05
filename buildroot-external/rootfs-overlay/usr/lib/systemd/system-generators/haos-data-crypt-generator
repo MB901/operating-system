@@ -140,3 +140,13 @@ cat > "${EARLY_DIR}/haos-expand.service.d/50-haos-data-crypt.conf" <<'EOF'
 [Unit]
 After=haos-data-unlock.service
 EOF
+
+# Recovery passphrase prompt: systemd-ask-password-wall.service stops the
+# console password agent as soon as user sessions are allowed (it assumes a
+# getty is available by then). On HAOS the consoles only start after
+# Supervisor, i.e. after the unlock, so keep the console agent until then.
+mkdir -p "${EARLY_DIR}/systemd-ask-password-wall.service.d"
+cat > "${EARLY_DIR}/systemd-ask-password-wall.service.d/50-haos-data-crypt.conf" <<'EOT'
+[Unit]
+After=haos-data-unlock.service
+EOT

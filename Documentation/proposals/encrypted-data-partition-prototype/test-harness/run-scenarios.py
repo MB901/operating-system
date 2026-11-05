@@ -64,7 +64,8 @@ CHECKS = [
 class KeyServer:
     def __init__(self, keys: str, workdir: str, deny: bool = False):
         self.log = open(os.path.join(workdir, "key-server.log"), "a")
-        args = [sys.executable, "-I", os.path.join(HERE, "key-server.py"), "--serve", keys]
+        args = [sys.executable, "-I", os.path.join(HERE, "key-server.py"), "--serve", keys,
+                "--port", os.environ.get("KEY_PORT", "8443")]
         if deny:
             args.append("--deny")
         self.proc = subprocess.Popen(args, stdout=self.log, stderr=subprocess.STDOUT)
@@ -282,8 +283,10 @@ DATA_PART_START = 1427456  # sector of hassos-data in the generic-x86-64 layout
 def scan_data_partition(disk: str, workdir: str, pattern: str) -> int:
     """Count lines containing pattern in the data partition of a stopped VM disk."""
     raw = os.path.join(workdir, "data-part.raw")
-    subprocess.run(["qemu-img", "dd", "-f", "qcow2", "-O", "raw", "bs=512", f"skip={DATA_PART_START}",
-                    f"if={disk}", f"of={raw}"], check=True)
+    size = int(subprocess.run(["qemu-img", "info", "-U", "--output=json", disk], capture_output=True,
+                              text=True, check=True).stdout.split('"virtual-size": ')[1].split(",")[0])
+    subprocess.run(["qemu-img", "dd", "-U", "-f", "qcow2", "-O", "raw", "bs=512", f"skip={DATA_PART_START}",
+                    f"count={size // 512 - DATA_PART_START}", f"if={disk}", f"of={raw}"], check=True)
     out = subprocess.run(["grep", "-c", "-a", pattern, raw], capture_output=True, text=True).stdout.strip()
     os.unlink(raw)
     return int(out or 0)
@@ -321,7 +324,9 @@ def scenario_migrate(img, keys, workdir):
         _, data_before = vm.run(DATA_SUMS)
         _, lsblk1 = vm.run("lsblk -o NAME,TYPE,SIZE,FSTYPE,LABEL /dev/vda8; df -h /mnt/data | tail -n 1")
         sup = vm.wait_cmd("docker exec hassio_cli ha supervisor info >/dev/null 2>&1", 1200, 30)
-        rc, bk = vm.run("docker exec hassio_cli ha backups new --name before-encryption --raw-json 2>&1 | tail -c 600", 1800)
+        rc, bk = vm.run("docker exec hassio_cli ha backups new --name before-encryption --raw-json 2>&1 | tail -c 400; "
+                        "docker exec hassio_cli ha backups new --name before-encryption-share --folders share "
+                        "--raw-json 2>&1 | tail -c 400", 1800)
         _, bklist = vm.run("docker exec hassio_cli ha backups list --raw-json 2>&1 | tail -c 800; ls -la /mnt/data/supervisor/backup/")
         lines += [f"### boot 1 (plain): data partition\n```\n{lsblk1.strip()}\n```",
                   f"### boot 1: overlay checksums\n```\n{ov_before.strip()}\n```",

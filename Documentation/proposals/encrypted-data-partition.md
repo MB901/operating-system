@@ -86,7 +86,8 @@ None of this needs `/mnt/data`. Core dumps are not stored (`etc/systemd/coredump
 
 - `cryptsetup` is built in through `udisks2` → `libblockdev` crypto plugin → `cryptsetup` (`package/udisks2/Config.in`, Buildroot `package/libblockdev/Config.in`). Present in the 18.4 rootfs as `/usr/sbin/cryptsetup` [V, T].
 - `systemd` is built with libcryptsetup: `/usr/lib/systemd/systemd-cryptsetup` and its generator are in the 18.4 rootfs [V]. The prototype does not use them.
-- `curl` and `bash` are present. `jose` and `luksmeta` exist as Buildroot packages, **`clevis` and `tang` do not**.
+- `curl` is present. **`/bin/bash` is busybox ash** (`busybox.config`: `CONFIG_BASH_IS_ASH=y`), not GNU bash. `clevis` is written for GNU bash and fails with it [T]. `jose` and `luksmeta` exist as Buildroot packages, **`clevis` and `tang` do not**.
+- **`resize2fs` and `wipefs` are not in the image** (e2fsprogs is built without resize2fs; only `systemd-growfs` can grow). An in-place conversion needs to shrink ext4, so it needs `BR2_PACKAGE_E2FSPROGS_RESIZE2FS` [V, T].
 - libcurl is built with `--with-ca-path=/etc/ssl/certs` (Buildroot `package/libcurl/libcurl.mk`). `--cacert` alone therefore does not restrict the trusted CAs.
 - **The kernel has no `DM_CRYPT`, `CRYPTO_XTS` or `CRYPTO_AES_NI_INTEL`.** I checked the `IKCONFIG` of the 18.4 release kernel `6.18.58-haos`, the fragments and upstream `x86_64_defconfig`. `MODVERSIONS` and module signing are off, which is what let the prototype load out-of-tree modules.
 
@@ -120,13 +121,18 @@ The unlock script takes "a command that prints the key on stdout". Two providers
 
 - **No LUKS token or cryptsetup plugin is needed to start.** `key.jwe` is the LUKS key encrypted with `clevis encrypt tang`, created with the server's advertisement passed as a file, so nothing has to be confirmed by hand.
 - A later step could use `clevis luks bind` (LUKS2 token in the header) or the systemd-cryptsetup clevis token plugin. That is not needed for a first version.
-- Size: clevis decrypt scripts plus `jose`, `libjose` and `libjansson` are about 323 kB uncompressed and about 116 KiB in the lzma erofs (measured with Ubuntu 24.04 binaries; Buildroot builds may differ). `bash`, `curl`, OpenSSL and zlib are already present.
+- Size, **measured with Ubuntu 24.04 binaries copied into the test rootfs, not Buildroot packages**:
+  - clevis decrypt scripts plus `jose`, `libjose` and `libjansson`: 323 kB uncompressed;
+  - GNU `bash` + `libtinfo`, needed by clevis because `/bin/bash` is busybox: 1.65 MB uncompressed;
+  - the whole test addition (these plus `resize2fs`) grows the lzma erofs by about 0.9 MB.
+
+  `curl`, OpenSSL and zlib are already present.
 
 Comparison. **This is a choice for maintainers, not a recommendation.**
 
 | | HTTPS (custom) | Tang (clevis) |
 |---|---|---|
-| New packages in the image | none (`curl` present) | `clevis` (new Buildroot package), `jose` (exists in Buildroot), `jansson` |
+| New packages in the image | none (`curl` present) | `clevis` (new Buildroot package), `jose` (exists), `jansson`, and **GNU `bash`** (clevis does not run on busybox ash) |
 | What a stolen box carries | URL, CA, **bearer token** (enough to ask for the key) | `key.jwe` and the server URL (enough to ask the server to help decrypt) |
 | What the server stores | the LUKS key itself | only its own key pair; it never sees the LUKS key |
 | Server software | anything that can serve a file with auth (NAS, reverse proxy, small script) | `tangd` (packaged in most distros, small) |
@@ -141,6 +147,7 @@ Comparison. **This is a choice for maintainers, not a recommendation.**
 - Retry forever with backoff, 5 s to 60 s [T]. A power cut often brings the PC back **before** the router or NAS. Nothing ever wipes or reformats.
 - Everything that needs `/mnt/data` waits, including Supervisor and both consoles (section 3). The console shows systemd's "A start job is running … (no limit)".
 - The unlock script asks for the recovery passphrase on the console through the systemd password agent (`systemd-ask-password`, while the network attempts continue) [T]. The prompt is just there, so a keyboard is never required. Whoever succeeds first wins, and the prompt disappears.
+  - Pitfall found in the VM: upstream `systemd-ask-password-wall.service` runs `systemctl stop systemd-ask-password-console.path …` as soon as user sessions are allowed, because systemd assumes a getty is up by then. On HAOS the gettys wait for Supervisor, so the prompt vanished and the console went silent [T]. The generator orders the wall agent after the unlock.
 - **Boot counting**: while locked, Supervisor never marks the slot good, so GRUB's `A_TRY` keeps growing across reboots. See `RESULTS.md` (scenario `locked-reboots`) for what happens after three power cuts in a row. This is an open question (section 10).
 
 ## 7. Recovery and backup of the key
@@ -166,7 +173,7 @@ Comparison. **This is a choice for maintainers, not a recommendation.**
 - **Data disk move** (`haos-data`, `e2image -ra`) would copy the **decrypted** filesystem to an unencrypted external disk, then relabel. Disabled by the prototype. It needs a LUKS-aware path in OS, os-agent and Supervisor.
 - **Disk detach** (`haos-data-disk-detach`) cannot find the disk of a dm device and would relabel the internal data filesystem as disabled. Disabled by the prototype.
 - **Wipe** (`haos.wipe=1`) looks for the label before unlock. Disabled by the prototype. It needs to decide whether to recreate LUKS2 or go back to plain ext4.
-- **Supervisor data disk view**: udisks2 reports the mapping as `/dev/dm-0` while os-agent's `CurrentDevice` is the mount source `/dev/mapper/hassos-data`. Supervisor compares the two (`resolution/checks/multiple_data_disks.py`, `mounts/disks.py`). See `RESULTS.md` for what Supervisor reports.
+- **Supervisor data disk view**: on D-Bus, udisks2 reports the mapping's `Device` as `/dev/dm-0`, while os-agent's `CurrentDevice` is the mount source `/dev/mapper/hassos-data` [T]. Supervisor compares these strings in `resolution/checks/multiple_data_disks.py` (and in `os/data_disk.py` and `mounts/disks.py`), so it would see the current data disk as a *second* disk with the `hassos-data` label. That is a false "multiple data disks" issue, and the device is not protected from being offered as a mount [H]. In the VM Supervisor stays in `setup` (no Internet), so the issue itself could not be read back. Fix: os-agent should report the resolved device, or Supervisor should compare device numbers.
 - **Downgrade**: a slot without dm-crypt or the generator cannot open the data. RAUC slot B is the previous OS, so encryption should only be enabled once both slots have a capable release.
 
 ## 10. Open questions for maintainers

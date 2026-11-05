@@ -79,16 +79,6 @@ else
         CLEVIS_FILES="/usr/bin/clevis /usr/bin/clevis-decrypt /usr/bin/clevis-decrypt-tang
             /usr/bin/clevis-decrypt-sss /usr/bin/jose
             /usr/lib/x86_64-linux-gnu/libjose.so.0 /usr/lib/x86_64-linux-gnu/libjansson.so.4"
-        # clevis is written for GNU bash; /bin/bash in HAOS is busybox ash
-        # (CONFIG_BASH_IS_ASH). Ship GNU bash (and libtinfo, which the HAOS
-        # ncurses build does not provide) in a private directory and point
-        # the clevis scripts to it, without touching /bin/bash.
-        install -D -m 0755 /usr/bin/bash "${WORK}/rootfs/usr/lib/clevis-test/bash"
-        install -D -m 0644 "$(readlink -f /usr/lib/x86_64-linux-gnu/libtinfo.so.6)" "${WORK}/rootfs/usr/lib/libtinfo.so.6"
-        for f in clevis clevis-decrypt clevis-decrypt-tang clevis-decrypt-sss; do
-            sed -i '1 s|^#!/bin/bash|#!/usr/lib/clevis-test/bash|' "${WORK}/rootfs/usr/bin/${f}"
-        done
-        echo "    GNU bash + libtinfo for clevis: $(du -cb /usr/bin/bash "$(readlink -f /usr/lib/x86_64-linux-gnu/libtinfo.so.6)" | tail -n 1 | cut -f1) bytes uncompressed"
         # resize2fs is not in the HAOS image (BR2_PACKAGE_E2FSPROGS_RESIZE2FS
         # is not set); the in-place conversion needs it to shrink ext4.
         install -D -m 0755 /usr/sbin/resize2fs "${WORK}/rootfs/usr/sbin/resize2fs"
@@ -101,6 +91,16 @@ else
         done
         # shellcheck disable=SC2086,SC2046
         echo "    clevis+jose files: $(du -cb $(for f in ${CLEVIS_FILES}; do readlink -f "${f}"; done) | tail -n 1 | cut -f1) bytes uncompressed"
+        # clevis is written for GNU bash; /bin/bash in HAOS is busybox ash
+        # (CONFIG_BASH_IS_ASH). Ship GNU bash (and libtinfo, which the HAOS
+        # ncurses build does not provide) in a private directory and point
+        # the clevis scripts to it, without touching /bin/bash.
+        install -D -m 0755 /usr/bin/bash "${WORK}/rootfs/usr/lib/clevis-test/bash"
+        install -D -m 0644 "$(readlink -f /usr/lib/x86_64-linux-gnu/libtinfo.so.6)" "${WORK}/rootfs/usr/lib/libtinfo.so.6"
+        for f in clevis clevis-decrypt clevis-decrypt-tang clevis-decrypt-sss; do
+            sed -i '1 s|^#!/bin/bash|#!/usr/lib/clevis-test/bash|' "${WORK}/rootfs/usr/bin/${f}"
+        done
+        echo "    GNU bash + libtinfo for clevis: $(du -cb /usr/bin/bash "$(readlink -f /usr/lib/x86_64-linux-gnu/libtinfo.so.6)" | tail -n 1 | cut -f1) bytes uncompressed"
     fi
     mkfs.erofs -zlzma,9 -Eztailpacking,fragments,dedupe -C262144 \
         "${WORK}/system0.new" "${WORK}/rootfs" > /dev/null
