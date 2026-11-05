@@ -1,0 +1,36 @@
+$ cat /mnt/boot/cmdline.txt; blkid /dev/vda8; cryptsetup luksDump /dev/vda8 2>&1 | head -n 25; ls -la /mnt/overlay/etc/haos-data-crypt 2>&1; systemctl --failed --no-legend --plain
+console=tty0 console=ttyS0 haos.data-crypt=1 haos.wipe=1
+/dev/vda8: UUID="8dcb7237-f9bd-4618-bffd-835753a254a9" TYPE="crypto_LUKS" PARTLABEL="hassos-data" PARTUUID="a52a4597-fa3a-4851-aefd-2fbe9f849079"
+LUKS header information
+Version:       	2
+Epoch:         	4
+Metadata area: 	16384 [bytes]
+Keyslots area: 	16744448 [bytes]
+UUID:          	8dcb7237-f9bd-4618-bffd-835753a254a9
+Label:         	(no label)
+Subsystem:     	(no subsystem)
+Flags:       	(no flags)
+
+Data segments:
+  0: crypt
+	offset: 16777216 [bytes]
+	length: (whole device)
+	cipher: aes-xts-plain64
+	sector: 512 [bytes]
+
+Keyslots:
+  0: luks2
+	Key:        512 bits
+	Priority:   normal
+	Cipher:     aes-xts-plain64
+	Cipher key: 512 bits
+	PBKDF:      pbkdf2
+	Hash:       sha256
+total 5
+drwx------    2 root     root          1024 Nov  5 07:05 .
+drwxr-xr-x   12 root     root          1024 Nov  5 07:36 ..
+-rw-r--r--    1 root     root           542 Nov  5 07:05 ca.pem
+-rw-r--r--    1 root     root            26 Nov  5 07:05 key-url
+-rw-------    1 root     root            44 Nov  5 07:05 token
+haos-wipe.service              loaded failed failed Home Assistant OS Device Wipe Service
+systemd-time-wait-sync.service loaded failed failed Wait Until Kernel Time Synchronized

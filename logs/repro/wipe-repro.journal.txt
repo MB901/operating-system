@@ -1,0 +1,1091 @@
+$ journalctl -b --no-pager -o short-monotonic
+[   12.366570] homeassistant kernel: Linux version 6.18.58-haos (builder@371c2064b27e) (x86_64-buildroot-linux-gnu-gcc.br_real (Buildroot -g30c038aa) 13.4.0, GNU ld (GNU Binutils) 2.43.1) #1 SMP PREEMPT_DYNAMIC Tue Oct 27 13:21:12 UTC 2026
+[   12.382309] homeassistant kernel: Command line: BOOT_IMAGE=(hd0,gpt2)/bzImage root=PARTUUID=8d3d53e3-6d49-4c38-8349-aff6859e82fd rootfstype=erofs rootwait zram.enabled=1 zram.num_devices=3 systemd.machine_id=372ff732d1104ff191128e1be68f10f1 fsck.repair=yes console=tty0 console=ttyS0 haos.data-crypt=1 haos.wipe=1 rauc.slot=A
+[   12.384795] homeassistant kernel: BIOS-provided physical RAM map:
+[   12.385070] homeassistant kernel: BIOS-e820: [mem 0x0000000000000000-0x000000000009ffff] usable
+[   12.385191] homeassistant kernel: BIOS-e820: [mem 0x0000000000100000-0x00000000007fffff] usable
+[   12.401674] homeassistant kernel: BIOS-e820: [mem 0x0000000000800000-0x0000000000807fff] ACPI NVS
+[   12.401988] homeassistant kernel: BIOS-e820: [mem 0x0000000000808000-0x000000000080afff] usable
+[   12.402094] homeassistant kernel: BIOS-e820: [mem 0x000000000080b000-0x000000000080bfff] ACPI NVS
+[   12.402183] homeassistant kernel: BIOS-e820: [mem 0x000000000080c000-0x000000000080ffff] usable
+[   12.402270] homeassistant kernel: BIOS-e820: [mem 0x0000000000810000-0x00000000008fffff] ACPI NVS
+[   12.402359] homeassistant kernel: BIOS-e820: [mem 0x0000000000900000-0x000000007ed3efff] usable
+[   12.402479] homeassistant kernel: BIOS-e820: [mem 0x000000007ed3f000-0x000000007edfffff] reserved
+[   12.402568] homeassistant kernel: BIOS-e820: [mem 0x000000007ee00000-0x000000007f8ecfff] usable
+[   12.402704] homeassistant kernel: BIOS-e820: [mem 0x000000007f8ed000-0x000000007fb6cfff] reserved
+[   12.402941] homeassistant kernel: BIOS-e820: [mem 0x000000007fb6d000-0x000000007fb7efff] ACPI data
+[   12.403057] homeassistant kernel: BIOS-e820: [mem 0x000000007fb7f000-0x000000007fbfefff] ACPI NVS
+[   12.403141] homeassistant kernel: BIOS-e820: [mem 0x000000007fbff000-0x000000007fedbfff] usable
+[   12.403233] homeassistant kernel: BIOS-e820: [mem 0x000000007fedc000-0x000000007ff5ffff] reserved
+[   12.403317] homeassistant kernel: BIOS-e820: [mem 0x000000007ff60000-0x000000007fffffff] ACPI NVS
+[   12.403425] homeassistant kernel: BIOS-e820: [mem 0x00000000e0000000-0x00000000efffffff] reserved
+[   12.403529] homeassistant kernel: BIOS-e820: [mem 0x000000fd00000000-0x000000ffffffffff] reserved
+[   12.403618] homeassistant kernel: NX (Execute Disable) protection: active
+[   12.403705] homeassistant kernel: APIC: Static calls initialized
+[   12.403817] homeassistant kernel: efi: EFI v2.7 by Ubuntu distribution of EDK II
+[   12.403936] homeassistant kernel: efi: SMBIOS=0x7f988000 SMBIOS 3.0=0x7f986000 ACPI=0x7fb7e000 ACPI 2.0=0x7fb7e014 MEMATTR=0x7e38b018 
+[   12.404022] homeassistant kernel: SMBIOS 3.0.0 present.
+[   12.404109] homeassistant kernel: DMI: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 2024.02-2ubuntu0.10 09/23/2026
+[   12.404208] homeassistant kernel: DMI: Memory slots populated: 1/1
+[   12.404374] homeassistant kernel: e820: update [mem 0x00000000-0x00000fff] usable ==> reserved
+[   12.404528] homeassistant kernel: e820: remove [mem 0x000a0000-0x000fffff] usable
+[   12.404630] homeassistant kernel: last_pfn = 0x7fedc max_arch_pfn = 0x10000000000
+[   12.404725] homeassistant kernel: MTRR map: 4 entries (2 fixed + 2 variable; max 18), built from 8 variable MTRRs
+[   12.404816] homeassistant kernel: x86/PAT: Configuration [0-7]: WB  WC  UC- UC  WB  WP  UC- WT  
+[   12.404899] homeassistant kernel: Using GB pages for direct mapping
+[   12.405002] homeassistant kernel: Secure boot disabled
+[   12.405090] homeassistant kernel: ACPI: Early table checksum verification disabled
+[   12.405173] homeassistant kernel: ACPI: RSDP 0x000000007FB7E014 000024 (v02 BOCHS )
+[   12.405296] homeassistant kernel: ACPI: XSDT 0x000000007FB7D0E8 000054 (v01 BOCHS  BXPC     00000001      01000013)
+[   12.407558] homeassistant kernel: ACPI: FACP 0x000000007FB79000 0000F4 (v03 BOCHS  BXPC     00000001 BXPC 00000001)
+[   12.407702] homeassistant kernel: ACPI: DSDT 0x000000007FB7A000 0021D6 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[   12.407904] homeassistant kernel: ACPI: FACS 0x000000007FBDD000 000040
+[   12.408007] homeassistant kernel: ACPI: APIC 0x000000007FB78000 000090 (v03 BOCHS  BXPC     00000001 BXPC 00000001)
+[   12.409491] homeassistant kernel: ACPI: HPET 0x000000007FB77000 000038 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[   12.409637] homeassistant kernel: ACPI: MCFG 0x000000007FB76000 00003C (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[   12.409743] homeassistant kernel: ACPI: WAET 0x000000007FB75000 000028 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[   12.409842] homeassistant kernel: ACPI: BGRT 0x000000007FB74000 000038 (v01 INTEL  EDK2     00000002      01000013)
+[   12.411484] homeassistant kernel: ACPI: Reserving FACP table memory at [mem 0x7fb79000-0x7fb790f3]
+[   12.411802] homeassistant kernel: ACPI: Reserving DSDT table memory at [mem 0x7fb7a000-0x7fb7c1d5]
+[   12.411914] homeassistant kernel: ACPI: Reserving FACS table memory at [mem 0x7fbdd000-0x7fbdd03f]
+[   12.412004] homeassistant kernel: ACPI: Reserving APIC table memory at [mem 0x7fb78000-0x7fb7808f]
+[   12.413428] homeassistant kernel: ACPI: Reserving HPET table memory at [mem 0x7fb77000-0x7fb77037]
+[   12.413630] homeassistant kernel: ACPI: Reserving MCFG table memory at [mem 0x7fb76000-0x7fb7603b]
+[   12.413733] homeassistant kernel: ACPI: Reserving WAET table memory at [mem 0x7fb75000-0x7fb75027]
+[   12.413825] homeassistant kernel: ACPI: Reserving BGRT table memory at [mem 0x7fb74000-0x7fb74037]
+[   12.413912] homeassistant kernel: No NUMA configuration found
+[   12.413997] homeassistant kernel: Faking a node at [mem 0x0000000000000000-0x000000007fedbfff]
+[   12.422143] homeassistant kernel: NODE_DATA(0) allocated [mem 0x7fe43180-0x7fe46fff]
+[   12.422357] homeassistant kernel: Zone ranges:
+[   12.422518] homeassistant kernel:   DMA      [mem 0x0000000000001000-0x0000000000ffffff]
+[   12.422642] homeassistant kernel:   DMA32    [mem 0x0000000001000000-0x000000007fedbfff]
+[   12.422743] homeassistant kernel:   Normal   empty
+[   12.422847] homeassistant kernel: Movable zone start for each node
+[   12.422934] homeassistant kernel: Early memory node ranges
+[   12.423029] homeassistant kernel:   node   0: [mem 0x0000000000001000-0x000000000009ffff]
+[   12.423273] homeassistant kernel:   node   0: [mem 0x0000000000100000-0x00000000007fffff]
+[   12.423373] homeassistant kernel:   node   0: [mem 0x0000000000808000-0x000000000080afff]
+[   12.423506] homeassistant kernel:   node   0: [mem 0x000000000080c000-0x000000000080ffff]
+[   12.423607] homeassistant kernel:   node   0: [mem 0x0000000000900000-0x000000007ed3efff]
+[   12.423708] homeassistant kernel:   node   0: [mem 0x000000007ee00000-0x000000007f8ecfff]
+[   12.423807] homeassistant kernel:   node   0: [mem 0x000000007fbff000-0x000000007fedbfff]
+[   12.423906] homeassistant kernel: Initmem setup node 0 [mem 0x0000000000001000-0x000000007fedbfff]
+[   12.423996] homeassistant kernel: On node 0, zone DMA: 1 pages in unavailable ranges
+[   12.424090] homeassistant kernel: On node 0, zone DMA: 96 pages in unavailable ranges
+[   12.424175] homeassistant kernel: On node 0, zone DMA: 8 pages in unavailable ranges
+[   12.424259] homeassistant kernel: On node 0, zone DMA: 1 pages in unavailable ranges
+[   12.424359] homeassistant kernel: On node 0, zone DMA: 240 pages in unavailable ranges
+[   12.424479] homeassistant kernel: On node 0, zone DMA32: 193 pages in unavailable ranges
+[   12.424569] homeassistant kernel: On node 0, zone DMA32: 786 pages in unavailable ranges
+[   12.424657] homeassistant kernel: On node 0, zone DMA32: 292 pages in unavailable ranges
+[   12.424764] homeassistant kernel: ACPI: PM-Timer IO Port: 0x608
+[   12.425013] homeassistant kernel: ACPI: LAPIC_NMI (acpi_id[0xff] dfl dfl lint[0x1])
+[   12.425162] homeassistant kernel: IOAPIC[0]: apic_id 0, version 32, address 0xfec00000, GSI 0-23
+[   12.431832] homeassistant kernel: ACPI: INT_SRC_OVR (bus 0 bus_irq 0 global_irq 2 dfl dfl)
+[   12.432101] homeassistant kernel: ACPI: INT_SRC_OVR (bus 0 bus_irq 5 global_irq 5 high level)
+[   12.432212] homeassistant kernel: ACPI: INT_SRC_OVR (bus 0 bus_irq 9 global_irq 9 high level)
+[   12.432309] homeassistant kernel: ACPI: INT_SRC_OVR (bus 0 bus_irq 10 global_irq 10 high level)
+[   12.432451] homeassistant kernel: ACPI: INT_SRC_OVR (bus 0 bus_irq 11 global_irq 11 high level)
+[   12.432584] homeassistant kernel: ACPI: Using ACPI (MADT) for SMP configuration information
+[   12.432672] homeassistant kernel: ACPI: HPET id: 0x8086a201 base: 0xfed00000
+[   12.432781] homeassistant kernel: e820: update [mem 0x7e107000-0x7e10ffff] usable ==> reserved
+[   12.432869] homeassistant kernel: CPU topo: Max. logical packages:   1
+[   12.432954] homeassistant kernel: CPU topo: Max. logical dies:       1
+[   12.433046] homeassistant kernel: CPU topo: Max. dies per package:   1
+[   12.433130] homeassistant kernel: CPU topo: Max. threads per core:   1
+[   12.433235] homeassistant kernel: CPU topo: Num. cores per package:     4
+[   12.437801] homeassistant kernel: CPU topo: Num. threads per package:   4
+[   12.437967] homeassistant kernel: CPU topo: Allowing 4 present CPUs plus 0 hotplug CPUs
+[   12.438517] homeassistant kernel: PM: hibernation: Registered nosave memory: [mem 0x00000000-0x00000fff]
+[   12.438674] homeassistant kernel: PM: hibernation: Registered nosave memory: [mem 0x000a0000-0x000fffff]
+[   12.438882] homeassistant kernel: PM: hibernation: Registered nosave memory: [mem 0x00800000-0x00807fff]
+[   12.438980] homeassistant kernel: PM: hibernation: Registered nosave memory: [mem 0x0080b000-0x0080bfff]
+[   12.439158] homeassistant kernel: PM: hibernation: Registered nosave memory: [mem 0x00810000-0x008fffff]
+[   12.439271] homeassistant kernel: PM: hibernation: Registered nosave memory: [mem 0x7e107000-0x7e10ffff]
+[   12.439359] homeassistant kernel: PM: hibernation: Registered nosave memory: [mem 0x7ed3f000-0x7edfffff]
+[   12.439495] homeassistant kernel: PM: hibernation: Registered nosave memory: [mem 0x7f8ed000-0x7fbfefff]
+[   12.439617] homeassistant kernel: [mem 0x80000000-0xdfffffff] available for PCI devices
+[   12.439713] homeassistant kernel: Booting paravirtualized kernel on bare hardware
+[   12.439863] homeassistant kernel: clocksource: refined-jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 1910969940391419 ns
+[   12.439966] homeassistant kernel: setup_percpu: NR_CPUS:64 nr_cpumask_bits:4 nr_cpu_ids:4 nr_node_ids:1
+[   12.440051] homeassistant kernel: percpu: Embedded 54 pages/cpu s183128 r8192 d29864 u524288
+[   12.440134] homeassistant kernel: pcpu-alloc: s183128 r8192 d29864 u524288 alloc=1*2097152
+[   12.440218] homeassistant kernel: pcpu-alloc: [0] 0 1 2 3 
+[   12.440311] homeassistant kernel: Kernel command line: BOOT_IMAGE=(hd0,gpt2)/bzImage root=PARTUUID=8d3d53e3-6d49-4c38-8349-aff6859e82fd rootfstype=erofs rootwait zram.enabled=1 zram.num_devices=3 systemd.machine_id=372ff732d1104ff191128e1be68f10f1 fsck.repair=yes console=tty0 console=ttyS0 haos.data-crypt=1 haos.wipe=1 rauc.slot=A
+[   12.440520] homeassistant kernel: random: crng init done
+[   12.440749] homeassistant kernel: printk: log buffer data + meta data: 262144 + 917504 = 1179648 bytes
+[   12.440866] homeassistant kernel: Dentry cache hash table entries: 262144 (order: 9, 2097152 bytes, linear)
+[   12.440979] homeassistant kernel: Inode-cache hash table entries: 131072 (order: 8, 1048576 bytes, linear)
+[   12.441072] homeassistant kernel: Fallback order for Node 0: 0 
+[   12.441501] homeassistant kernel: Built 1 zonelists, mobility grouping on.  Total pages: 522671
+[   12.441699] homeassistant kernel: Policy zone: DMA32
+[   12.441817] homeassistant kernel: mem auto-init: stack:all(zero), heap alloc:off, heap free:off
+[   12.441905] homeassistant kernel: SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=4, Nodes=1
+[   12.441986] homeassistant kernel: Dynamic Preempt: full
+[   12.442563] homeassistant kernel: rcu: Preemptible hierarchical RCU implementation.
+[   12.443003] homeassistant kernel: rcu:         RCU event tracing is enabled.
+[   12.443159] homeassistant kernel: rcu:         RCU restricting CPUs from NR_CPUS=64 to nr_cpu_ids=4.
+[   12.443256] homeassistant kernel:         Trampoline variant of Tasks RCU enabled.
+[   12.443442] homeassistant kernel:         Tracing variant of Tasks RCU enabled.
+[   12.443546] homeassistant kernel: rcu: RCU calculated value of scheduler-enlistment delay is 100 jiffies.
+[   12.443630] homeassistant kernel: rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=4
+[   12.443749] homeassistant kernel: RCU Tasks: Setting shift to 2 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=4.
+[   12.443847] homeassistant kernel: RCU Tasks Trace: Setting shift to 2 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=4.
+[   12.443930] homeassistant kernel: NR_IRQS: 4352, nr_irqs: 456, preallocated irqs: 16
+[   12.444021] homeassistant kernel: rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[   12.444148] homeassistant kernel: clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 1911260446275000 ns
+[   12.444242] homeassistant kernel: Console: colour dummy device 80x25
+[   12.444326] homeassistant kernel: printk: legacy console [tty0] enabled
+[   12.444436] homeassistant kernel: printk: legacy console [ttyS0] enabled
+[   12.444532] homeassistant kernel: ACPI: Core revision 20250807
+[   12.444615] homeassistant kernel: clocksource: hpet: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604467 ns
+[   12.444700] homeassistant kernel: APIC: Switch to symmetric I/O mode setup
+[   12.444801] homeassistant kernel: ..TIMER: vector=0x30 apic1=0 pin1=2 apic2=-1 pin2=-1
+[   12.445004] homeassistant kernel: tsc: Unable to calibrate against PIT
+[   12.445163] homeassistant kernel: tsc: using HPET reference calibration
+[   12.445703] homeassistant kernel: tsc: Detected 2099.942 MHz processor
+[   12.445949] homeassistant kernel: clocksource: tsc-early: mask: 0xffffffffffffffff max_cycles: 0x1e44f9db4fe, max_idle_ns: 440795292600 ns
+[   12.446358] homeassistant kernel: Calibrating delay loop (skipped), value calculated using timer frequency.. 4199.88 BogoMIPS (lpj=2099942)
+[   12.446561] homeassistant kernel: x86/cpu: User Mode Instruction Prevention (UMIP) activated
+[   12.446670] homeassistant kernel: Last level iTLB entries: 4KB 0, 2MB 0, 4MB 0
+[   12.446780] homeassistant kernel: Last level dTLB entries: 4KB 0, 2MB 0, 4MB 0, 1GB 0
+[   12.446870] homeassistant kernel: mitigations: Enabled attack vectors: user_kernel, user_user, SMT mitigations: auto
+[   12.446959] homeassistant kernel: Speculative Store Bypass: Vulnerable
+[   12.455582] homeassistant kernel: Spectre V2 : Mitigation: Retpolines
+[   12.455866] homeassistant kernel: Spectre V1 : Mitigation: usercopy/swapgs barriers and __user pointer sanitization
+[   12.455976] homeassistant kernel: Spectre V2 : Spectre v2 / SpectreRSB: Filling RSB on context switch and VMEXIT
+[   12.456525] homeassistant kernel: x86/fpu: Supporting XSAVE feature 0x001: 'x87 floating point registers'
+[   12.456672] homeassistant kernel: x86/fpu: Supporting XSAVE feature 0x002: 'SSE registers'
+[   12.456772] homeassistant kernel: x86/fpu: Supporting XSAVE feature 0x004: 'AVX registers'
+[   12.456890] homeassistant kernel: x86/fpu: Supporting XSAVE feature 0x008: 'MPX bounds registers'
+[   12.456987] homeassistant kernel: x86/fpu: Supporting XSAVE feature 0x010: 'MPX CSR'
+[   12.457513] homeassistant kernel: x86/fpu: Supporting XSAVE feature 0x200: 'Protection Keys User registers'
+[   12.457710] homeassistant kernel: x86/fpu: xstate_offset[2]:  576, xstate_sizes[2]:  256
+[   12.457829] homeassistant kernel: x86/fpu: xstate_offset[3]:  960, xstate_sizes[3]:   64
+[   12.457919] homeassistant kernel: x86/fpu: xstate_offset[4]: 1024, xstate_sizes[4]:   64
+[   12.458017] homeassistant kernel: x86/fpu: xstate_offset[9]: 2688, xstate_sizes[9]:    8
+[   12.460614] homeassistant kernel: x86/fpu: Enabled xstate features 0x21f, context size is 2696 bytes, using 'standard' format.
+[   12.460813] homeassistant kernel: Freeing SMP alternatives memory: 64K
+[   12.461079] homeassistant kernel: pid_max: default: 32768 minimum: 301
+[   12.461377] homeassistant kernel: LSM: initializing lsm=capability,apparmor
+[   12.461513] homeassistant kernel: AppArmor: AppArmor initialized
+[   12.461609] homeassistant kernel: Mount-cache hash table entries: 4096 (order: 3, 32768 bytes, linear)
+[   12.461701] homeassistant kernel: Mountpoint-cache hash table entries: 4096 (order: 3, 32768 bytes, linear)
+[   12.461806] homeassistant kernel: APIC calibration not consistent with PM-Timer: 97ms instead of 100ms
+[   12.461921] homeassistant kernel: APIC delta adjusted to PM-Timer: 6298668 (6112095)
+[   12.462010] homeassistant kernel: smpboot: CPU0: AMD QEMU TCG CPU version 2.5+ (family: 0x6, model: 0x6, stepping: 0x3)
+[   12.464319] homeassistant kernel: Performance Events: PMU not available due to virtualization, using software events only.
+[   12.464626] homeassistant kernel: signal: max sigframe size: 3632
+[   12.464754] homeassistant kernel: rcu: Hierarchical SRCU implementation.
+[   12.464856] homeassistant kernel: rcu:         Max phase no-delay instances is 400.
+[   12.464958] homeassistant kernel: Timer migration: 1 hierarchy levels; 8 children per group; 1 crossnode level
+[   12.474277] homeassistant kernel: smp: Bringing up secondary CPUs ...
+[   12.474559] homeassistant kernel: smpboot: x86: Booting SMP configuration:
+[   12.474677] homeassistant kernel: .... node  #0, CPUs:      #1 #2 #3
+[   12.474788] homeassistant kernel: calibrate_delay_direct() dropping min bogoMips estimate 1 = 2116483
+[   12.474880] homeassistant kernel: calibrate_delay_direct() dropping min bogoMips estimate 3 = 2138312
+[   12.474965] homeassistant kernel: calibrate_delay_direct() dropping max bogoMips estimate 0 = 2576347
+[   12.475391] homeassistant kernel: calibrate_delay_direct() dropping max bogoMips estimate 0 = 3384947
+[   12.475567] homeassistant kernel: calibrate_delay_direct() dropping min bogoMips estimate 2 = 1812566
+[   12.475675] homeassistant kernel: smp: Brought up 1 node, 4 CPUs
+[   12.475852] homeassistant kernel: smpboot: Total of 4 processors activated (17662.10 BogoMIPS)
+[   12.476011] homeassistant kernel: Memory: 1968576K/2090684K available (19488K kernel code, 3048K rwdata, 7740K rodata, 3008K init, 2268K bss, 117208K reserved, 0K cma-reserved)
+[   12.492634] homeassistant kernel: devtmpfs: initialized
+[   12.492795] homeassistant kernel: ACPI: PM: Registering ACPI NVS region [mem 0x00800000-0x00807fff] (32768 bytes)
+[   12.492906] homeassistant kernel: ACPI: PM: Registering ACPI NVS region [mem 0x0080b000-0x0080bfff] (4096 bytes)
+[   12.493003] homeassistant kernel: ACPI: PM: Registering ACPI NVS region [mem 0x00810000-0x008fffff] (983040 bytes)
+[   12.493385] homeassistant kernel: ACPI: PM: Registering ACPI NVS region [mem 0x7fb7f000-0x7fbfefff] (524288 bytes)
+[   12.493549] homeassistant kernel: ACPI: PM: Registering ACPI NVS region [mem 0x7ff60000-0x7fffffff] (655360 bytes)
+[   12.493656] homeassistant kernel: posixtimers hash table entries: 2048 (order: 3, 32768 bytes, linear)
+[   12.493751] homeassistant kernel: futex hash table entries: 1024 (65536 bytes on 1 NUMA nodes, total 64 KiB, linear).
+[   12.493860] homeassistant kernel: pinctrl core: initialized pinctrl subsystem
+[   12.494239] homeassistant kernel: PM: RTC time: 20:51:04, date: 2026-11-05
+[   12.494383] homeassistant kernel: NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[   12.494515] homeassistant kernel: audit: initializing netlink subsys (disabled)
+[   12.494608] homeassistant kernel: audit: type=2000 audit(1793911863.853:1): state=initialized audit_enabled=0 res=1
+[   12.494701] homeassistant kernel: thermal_sys: Registered thermal governor 'step_wise'
+[   12.494824] homeassistant kernel: cpuidle: using governor menu
+[   12.494922] homeassistant kernel: efi: Freeing EFI boot services memory: 35460K
+[   12.495017] homeassistant kernel: PCI: ECAM [mem 0xe0000000-0xefffffff] (base 0xe0000000) for domain 0000 [bus 00-ff]
+[   12.497696] homeassistant kernel: PCI: Using configuration type 1 for base access
+[   12.497888] homeassistant kernel: mtrr: your CPUs had inconsistent fixed MTRR settings
+[   12.497993] homeassistant kernel: mtrr: your CPUs had inconsistent variable MTRR settings
+[   12.498215] homeassistant kernel: mtrr: your CPUs had inconsistent MTRRdefType settings
+[   12.498383] homeassistant kernel: mtrr: probably your BIOS does not setup all CPUs.
+[   12.498527] homeassistant kernel: mtrr: corrected configuration.
+[   12.498631] homeassistant kernel: kprobes: kprobe jump-optimization is enabled. All kprobes are optimized if possible.
+[   12.498736] homeassistant kernel: HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+[   12.498840] homeassistant kernel: HugeTLB: 28 KiB vmemmap can be freed for a 2.00 MiB page
+[   12.498929] homeassistant kernel: ACPI: Added _OSI(Module Device)
+[   12.499017] homeassistant kernel: ACPI: Added _OSI(Processor Device)
+[   12.499250] homeassistant kernel: ACPI: Added _OSI(Processor Aggregator Device)
+[   12.499366] homeassistant kernel: ACPI: 1 ACPI AML tables successfully acquired and loaded
+[   12.499572] homeassistant kernel: ACPI: Interpreter enabled
+[   12.499667] homeassistant kernel: ACPI: PM: (supports S0 S3 S4 S5)
+[   12.499757] homeassistant kernel: ACPI: Using IOAPIC for interrupt routing
+[   12.499916] homeassistant kernel: PCI: Using host bridge windows from ACPI; if necessary, use "pci=nocrs" and report a bug
+[   12.500016] homeassistant kernel: PCI: Ignoring E820 reservations for host bridge windows
+[   12.506627] homeassistant kernel: ACPI: Enabled 2 GPEs in block 00 to 3F
+[   12.506823] homeassistant kernel: ACPI: PCI Root Bridge [PCI0] (domain 0000 [bus 00-ff])
+[   12.527705] homeassistant kernel: acpi PNP0A08:00: _OSC: OS supports [ExtendedConfig ASPM ClockPM Segments MSI HPX-Type3]
+[   12.536514] homeassistant kernel: acpi PNP0A08:00: _OSC: platform does not support [LTR]
+[   12.542920] homeassistant kernel: acpi PNP0A08:00: _OSC: OS now controls [PME PCIeCapability]
+[   12.543263] homeassistant kernel: PCI host bridge to bus 0000:00
+[   12.545230] homeassistant kernel: pci_bus 0000:00: root bus resource [io  0x0000-0x0cf7 window]
+[   12.547938] homeassistant kernel: pci_bus 0000:00: root bus resource [io  0x0d00-0xffff window]
+[   12.559374] homeassistant kernel: pci_bus 0000:00: root bus resource [mem 0x000a0000-0x000bffff window]
+[   12.562584] homeassistant kernel: pci_bus 0000:00: root bus resource [mem 0x80000000-0xdfffffff window]
+[   12.564106] homeassistant kernel: pci_bus 0000:00: root bus resource [mem 0xf0000000-0xfebfffff window]
+[   12.571914] homeassistant kernel: pci_bus 0000:00: root bus resource [mem 0xc000000000-0xc7ffffffff window]
+[   12.579350] homeassistant kernel: pci_bus 0000:00: root bus resource [bus 00-ff]
+[   12.584596] homeassistant kernel: pci 0000:00:00.0: [8086:29c0] type 00 class 0x060000 conventional PCI endpoint
+[   12.589585] homeassistant kernel: pci 0000:00:01.0: [1234:1111] type 00 class 0x030000 conventional PCI endpoint
+[   12.598121] homeassistant kernel: pci 0000:00:01.0: BAR 0 [mem 0x80000000-0x80ffffff pref]
+[   12.599872] homeassistant kernel: pci 0000:00:01.0: BAR 2 [mem 0x81082000-0x81082fff]
+[   12.601780] homeassistant kernel: pci 0000:00:01.0: ROM [mem 0xffff0000-0xffffffff pref]
+[   12.603790] homeassistant kernel: pci 0000:00:01.0: Video device with shadowed ROM at [mem 0x000c0000-0x000dffff]
+[   12.612445] homeassistant kernel: pci 0000:00:02.0: [1af4:1000] type 00 class 0x020000 conventional PCI endpoint
+[   12.614808] homeassistant kernel: pci 0000:00:02.0: BAR 0 [io  0x60e0-0x60ff]
+[   12.625642] homeassistant kernel: pci 0000:00:02.0: BAR 4 [mem 0xc000000000-0xc000003fff 64bit pref]
+[   12.627498] homeassistant kernel: pci 0000:00:02.0: ROM [mem 0xfff80000-0xffffffff pref]
+[   12.629143] homeassistant kernel: pci 0000:00:03.0: [1af4:1001] type 00 class 0x010000 conventional PCI endpoint
+[   12.634267] homeassistant kernel: pci 0000:00:03.0: BAR 0 [io  0x6000-0x607f]
+[   12.639857] homeassistant kernel: pci 0000:00:03.0: BAR 1 [mem 0x81081000-0x81081fff]
+[   12.645343] homeassistant kernel: pci 0000:00:03.0: BAR 4 [mem 0xc000004000-0xc000007fff 64bit pref]
+[   12.650121] homeassistant kernel: pci 0000:00:1f.0: [8086:2918] type 00 class 0x060100 conventional PCI endpoint
+[   12.675621] homeassistant kernel: pci 0000:00:1f.0: quirk: [io  0x0600-0x067f] claimed by ICH6 ACPI/GPIO/TCO
+[   12.692749] homeassistant kernel: pci 0000:00:1f.2: [8086:2922] type 00 class 0x010601 conventional PCI endpoint
+[   12.707917] homeassistant kernel: pci 0000:00:1f.2: BAR 4 [io  0x60c0-0x60df]
+[   12.714683] homeassistant kernel: pci 0000:00:1f.2: BAR 5 [mem 0x81080000-0x81080fff]
+[   12.716540] homeassistant kernel: pci 0000:00:1f.3: [8086:2930] type 00 class 0x0c0500 conventional PCI endpoint
+[   12.719913] homeassistant kernel: pci 0000:00:1f.3: BAR 4 [io  0x6080-0x60bf]
+[   12.721591] homeassistant kernel: ACPI: PCI: Interrupt link LNKA configured for IRQ 10
+[   12.721765] homeassistant kernel: ACPI: PCI: Interrupt link LNKB configured for IRQ 10
+[   12.721867] homeassistant kernel: ACPI: PCI: Interrupt link LNKC configured for IRQ 11
+[   12.721959] homeassistant kernel: ACPI: PCI: Interrupt link LNKD configured for IRQ 11
+[   12.722297] homeassistant kernel: ACPI: PCI: Interrupt link LNKE configured for IRQ 10
+[   12.722453] homeassistant kernel: ACPI: PCI: Interrupt link LNKF configured for IRQ 10
+[   12.722567] homeassistant kernel: ACPI: PCI: Interrupt link LNKG configured for IRQ 11
+[   12.722656] homeassistant kernel: ACPI: PCI: Interrupt link LNKH configured for IRQ 11
+[   12.722760] homeassistant kernel: ACPI: PCI: Interrupt link GSIA configured for IRQ 16
+[   12.722853] homeassistant kernel: ACPI: PCI: Interrupt link GSIB configured for IRQ 17
+[   12.722945] homeassistant kernel: ACPI: PCI: Interrupt link GSIC configured for IRQ 18
+[   12.723607] homeassistant kernel: ACPI: PCI: Interrupt link GSID configured for IRQ 19
+[   12.723822] homeassistant kernel: ACPI: PCI: Interrupt link GSIE configured for IRQ 20
+[   12.723927] homeassistant kernel: ACPI: PCI: Interrupt link GSIF configured for IRQ 21
+[   12.724278] homeassistant kernel: ACPI: PCI: Interrupt link GSIG configured for IRQ 22
+[   12.724458] homeassistant kernel: ACPI: PCI: Interrupt link GSIH configured for IRQ 23
+[   12.724566] homeassistant kernel: iommu: Default domain type: Translated
+[   12.724659] homeassistant kernel: iommu: DMA domain TLB invalidation policy: lazy mode
+[   12.724758] homeassistant kernel: SCSI subsystem initialized
+[   12.724854] homeassistant kernel: libata version 3.00 loaded.
+[   12.724951] homeassistant kernel: ACPI: bus type USB registered
+[   12.725282] homeassistant kernel: usbcore: registered new interface driver usbfs
+[   12.725432] homeassistant kernel: usbcore: registered new interface driver hub
+[   12.725626] homeassistant kernel: usbcore: registered new device driver usb
+[   12.725740] homeassistant kernel: mc: Linux media interface: v0.10
+[   12.725845] homeassistant kernel: videodev: Linux video capture interface: v2.00
+[   12.725935] homeassistant kernel: pps_core: LinuxPPS API ver. 1 registered
+[   12.726154] homeassistant kernel: pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[   12.726286] homeassistant kernel: PTP clock support registered
+[   12.726385] homeassistant kernel: EDAC MC: Ver: 3.0.0
+[   12.726514] homeassistant kernel: efivars: Registered efivars operations
+[   12.726609] homeassistant kernel: Advanced Linux Sound Architecture Driver Initialized.
+[   12.726700] homeassistant kernel: NetLabel: Initializing
+[   12.726875] homeassistant kernel: NetLabel:  domain hash size = 128
+[   12.726985] homeassistant kernel: NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[   12.727455] homeassistant kernel: NetLabel:  unlabeled traffic allowed by default
+[   12.727692] homeassistant kernel: PCI: Using ACPI for IRQ routing
+[   12.727815] homeassistant kernel: PCI: pci_cache_line_size set to 64 bytes
+[   12.727911] homeassistant kernel: e820: reserve RAM buffer [mem 0x0080b000-0x008fffff]
+[   12.728348] homeassistant kernel: e820: reserve RAM buffer [mem 0x00810000-0x008fffff]
+[   12.728598] homeassistant kernel: e820: reserve RAM buffer [mem 0x7e107000-0x7fffffff]
+[   12.728795] homeassistant kernel: e820: reserve RAM buffer [mem 0x7ed3f000-0x7fffffff]
+[   12.728904] homeassistant kernel: e820: reserve RAM buffer [mem 0x7f8ed000-0x7fffffff]
+[   12.729002] homeassistant kernel: e820: reserve RAM buffer [mem 0x7fedc000-0x7fffffff]
+[   12.731684] homeassistant kernel: pci 0000:00:01.0: vgaarb: setting as boot VGA device
+[   12.734434] homeassistant kernel: pci 0000:00:01.0: vgaarb: bridge control possible
+[   12.737286] homeassistant kernel: pci 0000:00:01.0: vgaarb: VGA device added: decodes=io+mem,owns=io+mem,locks=none
+[   12.737679] homeassistant kernel: vgaarb: loaded
+[   12.737922] homeassistant kernel: hpet0: at MMIO 0xfed00000, IRQs 2, 8, 0
+[   12.738430] homeassistant kernel: hpet0: 3 comparators, 64-bit 100.000000 MHz counter
+[   12.738627] homeassistant kernel: clocksource: Switched to clocksource tsc-early
+[   12.738727] homeassistant kernel: VFS: Disk quotas dquot_6.6.0
+[   12.738839] homeassistant kernel: VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[   12.738927] homeassistant kernel: AppArmor: AppArmor Filesystem Enabled
+[   12.739168] homeassistant kernel: pnp: PnP ACPI init
+[   12.741513] homeassistant kernel: system 00:04: [mem 0xe0000000-0xefffffff window] has been reserved
+[   12.741763] homeassistant kernel: pnp: PnP ACPI: found 5 devices
+[   12.741881] homeassistant kernel: clocksource: acpi_pm: mask: 0xffffff max_cycles: 0xffffff, max_idle_ns: 2085701024 ns
+[   12.741971] homeassistant kernel: NET: Registered PF_INET protocol family
+[   12.742445] homeassistant kernel: IP idents hash table entries: 32768 (order: 6, 262144 bytes, linear)
+[   12.742588] homeassistant kernel: tcp_listen_portaddr_hash hash table entries: 1024 (order: 2, 16384 bytes, linear)
+[   12.742684] homeassistant kernel: Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[   12.742787] homeassistant kernel: TCP established hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[   12.742880] homeassistant kernel: TCP bind hash table entries: 16384 (order: 7, 524288 bytes, linear)
+[   12.742970] homeassistant kernel: TCP: Hash tables configured (established 16384 bind 16384)
+[   12.743508] homeassistant kernel: MPTCP token hash table entries: 2048 (order: 4, 49152 bytes, linear)
+[   12.743644] homeassistant kernel: UDP hash table entries: 1024 (order: 4, 65536 bytes, linear)
+[   12.743756] homeassistant kernel: UDP-Lite hash table entries: 1024 (order: 4, 65536 bytes, linear)
+[   12.743851] homeassistant kernel: NET: Registered PF_UNIX/PF_LOCAL protocol family
+[   12.743941] homeassistant kernel: RPC: Registered named UNIX socket transport module.
+[   12.744331] homeassistant kernel: RPC: Registered udp transport module.
+[   12.744495] homeassistant kernel: RPC: Registered tcp transport module.
+[   12.744597] homeassistant kernel: RPC: Registered tcp-with-tls transport module.
+[   12.744697] homeassistant kernel: RPC: Registered tcp NFSv4.1 backchannel transport module.
+[   12.747894] homeassistant kernel: pci 0000:00:02.0: ROM [mem 0xfff80000-0xffffffff pref]: can't claim; no compatible bridge window
+[   12.752742] homeassistant kernel: pci 0000:00:02.0: ROM [mem 0x81000000-0x8107ffff pref]: assigned
+[   12.756793] homeassistant kernel: pci_bus 0000:00: resource 4 [io  0x0000-0x0cf7 window]
+[   12.759120] homeassistant kernel: pci_bus 0000:00: resource 5 [io  0x0d00-0xffff window]
+[   12.760650] homeassistant kernel: pci_bus 0000:00: resource 6 [mem 0x000a0000-0x000bffff window]
+[   12.766895] homeassistant kernel: pci_bus 0000:00: resource 7 [mem 0x80000000-0xdfffffff window]
+[   12.768508] homeassistant kernel: pci_bus 0000:00: resource 8 [mem 0xf0000000-0xfebfffff window]
+[   12.771480] homeassistant kernel: pci_bus 0000:00: resource 9 [mem 0xc000000000-0xc7ffffffff window]
+[   12.771712] homeassistant kernel: PCI: CLS 0 bytes, default 64
+[   12.771833] homeassistant kernel: Initialise system trusted keyrings
+[   12.771935] homeassistant kernel: workingset: timestamp_bits=40 max_order=19 bucket_order=0
+[   12.772027] homeassistant kernel: squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[   12.777894] homeassistant kernel: NFS: Registering the id_resolver key type
+[   12.778073] homeassistant kernel: Key type id_resolver registered
+[   12.778183] homeassistant kernel: Key type id_legacy registered
+[   12.778282] homeassistant kernel: nfs4filelayout_init: NFSv4 File Layout Driver Registering...
+[   12.778384] homeassistant kernel: nfs4flexfilelayout_init: NFSv4 Flexfile Layout Driver Registering...
+[   12.778531] homeassistant kernel: 9p: Installing v9fs 9p2000 file system support
+[   12.778820] homeassistant kernel: Key type asymmetric registered
+[   12.778961] homeassistant kernel: Asymmetric key parser 'x509' registered
+[   12.779063] homeassistant kernel: Block layer SCSI generic (bsg) driver version 0.4 loaded (major 247)
+[   12.779162] homeassistant kernel: io scheduler mq-deadline registered
+[   12.779259] homeassistant kernel: io scheduler kyber registered
+[   12.779365] homeassistant kernel: ACPI: \_SB_.GSIG: Enabled at IRQ 22
+[   12.779533] homeassistant kernel: ACPI: \_SB_.GSIH: Enabled at IRQ 23
+[   12.779643] homeassistant kernel: Serial: 8250/16550 driver, 4 ports, IRQ sharing enabled
+[   12.779753] homeassistant kernel: 00:03: ttyS0 at I/O 0x3f8 (irq = 4, base_baud = 115200) is a 16550A
+[   12.779856] homeassistant kernel: Non-volatile memory driver v1.3
+[   12.779953] homeassistant kernel: Linux agpgart interface v0.103
+[   12.780052] homeassistant kernel: ACPI: bus type drm_connector registered
+[   12.780151] homeassistant kernel: loop: module loaded
+[   12.783033] homeassistant kernel: virtio_blk virtio1: 4/0/0 default/read/poll queues
+[   12.787572] homeassistant kernel: virtio_blk virtio1: [vda] 12582912 512-byte logical blocks (6.44 GB/6.00 GiB)
+[   12.787816] homeassistant kernel:  vda: vda1 vda2 vda3 vda4 vda5 vda6 vda7 vda8
+[   12.788008] homeassistant kernel: zram: Added device: zram0
+[   12.788107] homeassistant kernel: zram: Added device: zram1
+[   12.788201] homeassistant kernel: zram: Added device: zram2
+[   12.792997] homeassistant kernel: lpc_ich 0000:00:1f.0: I/O space for GPIO uninitialized
+[   12.793546] homeassistant kernel: ACPI: \_SB_.GSIA: Enabled at IRQ 16
+[   12.799466] homeassistant kernel: ahci 0000:00:1f.2: AHCI vers 0001.0000, 32 command slots, 1.5 Gbps, SATA mode
+[   12.805886] homeassistant kernel: ahci 0000:00:1f.2: 6/6 ports implemented (port mask 0x3f)
+[   12.808039] homeassistant kernel: ahci 0000:00:1f.2: flags: 64bit ncq only 
+[   12.817433] homeassistant kernel: scsi host0: ahci
+[   12.820967] homeassistant kernel: scsi host1: ahci
+[   12.830450] homeassistant kernel: scsi host2: ahci
+[   12.842595] homeassistant kernel: scsi host3: ahci
+[   12.844910] homeassistant kernel: scsi host4: ahci
+[   12.846790] homeassistant kernel: scsi host5: ahci
+[   12.847021] homeassistant kernel: ata1: SATA max UDMA/133 abar m4096@0x81080000 port 0x81080100 irq 29 lpm-pol 1
+[   12.847149] homeassistant kernel: ata2: SATA max UDMA/133 abar m4096@0x81080000 port 0x81080180 irq 29 lpm-pol 1
+[   12.847246] homeassistant kernel: ata3: SATA max UDMA/133 abar m4096@0x81080000 port 0x81080200 irq 29 lpm-pol 1
+[   12.847350] homeassistant kernel: ata4: SATA max UDMA/133 abar m4096@0x81080000 port 0x81080280 irq 29 lpm-pol 1
+[   12.847502] homeassistant kernel: ata5: SATA max UDMA/133 abar m4096@0x81080000 port 0x81080300 irq 29 lpm-pol 1
+[   12.847598] homeassistant kernel: ata6: SATA max UDMA/133 abar m4096@0x81080000 port 0x81080380 irq 29 lpm-pol 1
+[   12.847857] homeassistant kernel: tun: Universal TUN/TAP device driver, 1.6
+[   12.847970] homeassistant kernel: e100: Intel(R) PRO/100 Network Driver
+[   12.848076] homeassistant kernel: e100: Copyright(c) 1999-2006 Intel Corporation
+[   12.848214] homeassistant kernel: e1000: Intel(R) PRO/1000 Network Driver
+[   12.848326] homeassistant kernel: e1000: Copyright (c) 1999-2006 Intel Corporation.
+[   12.848450] homeassistant kernel: e1000e: Intel(R) PRO/1000 Network Driver
+[   12.848550] homeassistant kernel: e1000e: Copyright(c) 1999 - 2015 Intel Corporation.
+[   12.848654] homeassistant kernel: igb: Intel(R) Gigabit Ethernet Network Driver
+[   12.848758] homeassistant kernel: igb: Copyright (c) 2007-2014 Intel Corporation.
+[   12.848866] homeassistant kernel: ixgbe: Intel(R) 10 Gigabit PCI Express Network Driver
+[   12.848966] homeassistant kernel: ixgbe: Copyright (c) 1999-2016 Intel Corporation.
+[   12.849054] homeassistant kernel: sky2: driver version 1.30
+[   12.849163] homeassistant kernel: usbcore: registered new interface driver usblp
+[   12.853873] homeassistant kernel: usbcore: registered new interface driver usb-storage
+[   12.854081] homeassistant kernel: usbcore: registered new interface driver usbserial_generic
+[   12.854266] homeassistant kernel: usbserial: USB Serial support registered for generic
+[   12.854375] homeassistant kernel: i8042: PNP: PS/2 Controller [PNP0303:KBD,PNP0f13:MOU] at 0x60,0x64 irq 1,12
+[   12.854530] homeassistant kernel: serio: i8042 KBD port at 0x60,0x64 irq 1
+[   12.854628] homeassistant kernel: serio: i8042 AUX port at 0x60,0x64 irq 12
+[   12.856564] homeassistant kernel: rtc_cmos PNP0B00:00: RTC can wake from S4
+[   12.863810] homeassistant kernel: rtc_cmos PNP0B00:00: registered as rtc0
+[   12.870483] homeassistant kernel: rtc_cmos PNP0B00:00: alarms up to one day, y3k, 242 bytes nvram
+[   12.870745] homeassistant kernel: Driver for 1-wire Dallas network protocol.
+[   12.875216] homeassistant kernel: i801_smbus 0000:00:1f.3: Enabling SMBus device
+[   12.880838] homeassistant kernel: iTCO_wdt iTCO_wdt.0.auto: Found a ICH9 TCO device (Version=2, TCOBASE=0x0660)
+[   12.889874] homeassistant kernel: i801_smbus 0000:00:1f.3: SMBus using PCI interrupt
+[   12.891867] homeassistant kernel: iTCO_wdt iTCO_wdt.0.auto: initialized. heartbeat=30 sec (nowayout=0)
+[   12.892095] homeassistant kernel: it87_wdt: no device
+[   12.892211] homeassistant kernel: device-mapper: ioctl: 4.50.0-ioctl (2025-04-28) initialised: dm-devel@lists.linux.dev
+[   12.894914] homeassistant kernel: i2c i2c-0: Memory type 0x07 not supported yet, not instantiating SPD
+[   12.896356] homeassistant kernel: amd_pstate: the _CPC object is not present in SBIOS or ACPI disabled
+[   12.896560] homeassistant kernel: sdhci: Secure Digital Host Controller Interface driver
+[   12.896669] homeassistant kernel: sdhci: Copyright(c) Pierre Ossman
+[   12.896786] homeassistant kernel: efifb: probing for efifb
+[   12.896884] homeassistant kernel: efifb: framebuffer at 0x80000000, using 4000k, total 4000k
+[   12.900435] homeassistant kernel: efifb: mode is 1280x800x32, linelength=5120, pages=1
+[   12.900646] homeassistant kernel: efifb: scrolling: redraw
+[   12.900780] homeassistant kernel: efifb: Truecolor: size=8:8:8:8, shift=24:16:8:0
+[   12.900888] homeassistant kernel: Console: switching to colour frame buffer device 160x50
+[   12.900980] homeassistant kernel: fb0: EFI VGA frame buffer device
+[   12.902426] homeassistant kernel: hid: raw HID events driver (C) Jiri Kosina
+[   12.902604] homeassistant kernel: usbcore: registered new interface driver usbhid
+[   12.902700] homeassistant kernel: usbhid: USB HID core driver
+[   12.902807] homeassistant kernel: IPVS: Registered protocols ()
+[   12.902903] homeassistant kernel: IPVS: Connection hash table configured (size=4096, memory=32Kbytes)
+[   12.902989] homeassistant kernel: IPVS: ipvs loaded.
+[   12.913719] homeassistant kernel: IPVS: [rr] scheduler registered.
+[   12.914499] homeassistant kernel: NET: Registered PF_INET6 protocol family
+[   12.914699] homeassistant kernel: Segment Routing with IPv6
+[   12.914837] homeassistant kernel: In-situ OAM (IOAM) with IPv6
+[   12.923325] homeassistant kernel: NET: Registered PF_PACKET protocol family
+[   12.923766] homeassistant kernel: Bridge firewalling registered
+[   12.923907] homeassistant kernel: 9pnet: Installing 9P2000 support
+[   12.924002] homeassistant kernel: Key type dns_resolver registered
+[   12.925470] homeassistant kernel: IPI shorthand broadcast: enabled
+[   12.925634] homeassistant kernel: sched_clock: Marking stable (2842103858, -23727853)->(3095209249, -276833244)
+[   12.925747] homeassistant kernel: registered taskstats version 1
+[   12.933804] homeassistant kernel: Loading compiled-in X.509 certificates
+[   12.934029] homeassistant kernel: zswap: loaded using pool lz4
+[   12.934238] homeassistant kernel: Demotion targets for Node 0: null
+[   12.934338] homeassistant kernel: ata4: SATA link down (SStatus 0 SControl 300)
+[   12.934483] homeassistant kernel: AppArmor: AppArmor sha256 policy hashing enabled
+[   12.934585] homeassistant kernel: ata5: SATA link down (SStatus 0 SControl 300)
+[   12.934672] homeassistant kernel: PM:   Magic number: 2:867:901
+[   12.934771] homeassistant kernel: ata6: SATA link down (SStatus 0 SControl 300)
+[   12.934862] homeassistant kernel: ata2: SATA link down (SStatus 0 SControl 300)
+[   12.936809] homeassistant kernel: clocksource clocksource0: hash matches
+[   12.937035] homeassistant kernel: ata3: SATA link up 1.5 Gbps (SStatus 113 SControl 300)
+[   12.937141] homeassistant kernel: netconsole: network logging started
+[   12.942257] homeassistant kernel: ata1: SATA link down (SStatus 0 SControl 300)
+[   12.942694] homeassistant kernel: clk: Disabling unused clocks
+[   12.942856] homeassistant kernel: ata3.00: ATAPI: QEMU DVD-ROM, 2.5+, max UDMA/100
+[   12.942964] homeassistant kernel: ALSA device list:
+[   12.944649] homeassistant kernel: ata3.00: applying bridge limits
+[   12.944831] homeassistant kernel:   No soundcards found.
+[   12.944933] homeassistant kernel: ata3.00: configured for UDMA/100
+[   12.946372] homeassistant kernel: check access for rdinit=/init failed: -2, ignoring
+[   13.010203] homeassistant kernel: scsi 2:0:0:0: CD-ROM            QEMU     QEMU DVD-ROM     2.5+ PQ: 0 ANSI: 5
+[   13.012143] homeassistant kernel: sr 2:0:0:0: [sr0] scsi3-mmc drive: 4x/4x cd/rw xa/form2 tray
+[   13.012348] homeassistant kernel: cdrom: Uniform CD-ROM driver Revision: 3.20
+[   13.064496] homeassistant kernel: sr 2:0:0:0: Attached scsi CD-ROM sr0
+[   13.078642] homeassistant kernel: sr 2:0:0:0: Attached scsi generic sg0 type 5
+[   13.078970] homeassistant kernel: input: ImExPS/2 Generic Explorer Mouse as /devices/platform/i8042/serio1/input/input1
+[   13.084561] homeassistant kernel: input: AT Translated Set 2 keyboard as /devices/platform/i8042/serio0/input/input2
+[   13.084812] homeassistant kernel: md: Waiting for all devices to be available before autodetect
+[   13.084934] homeassistant kernel: md: If you don't use raid, use raid=noautodetect
+[   13.085084] homeassistant kernel: md: Autodetecting RAID arrays.
+[   13.085178] homeassistant kernel: md: autorun ...
+[   13.106547] homeassistant kernel: md: ... autorun DONE.
+[   13.106817] homeassistant kernel: erofs (device vda3): mounted with root inode @ nid 37.
+[   13.106936] homeassistant kernel: VFS: Mounted root (erofs filesystem) readonly on device 253:3.
+[   13.107023] homeassistant kernel: devtmpfs: mounted
+[   13.108340] homeassistant kernel: tsc: Refined TSC clocksource calibration: 2100.000 MHz
+[   13.108660] homeassistant kernel: clocksource: tsc: mask: 0xffffffffffffffff max_cycles: 0x1e4530a99b6, max_idle_ns: 440795257976 ns
+[   13.108770] homeassistant kernel: clocksource: Switched to clocksource tsc
+[   13.108874] homeassistant kernel: Freeing unused kernel image (initmem) memory: 3008K
+[   13.108965] homeassistant kernel: Write protecting the kernel read-only data: 28672k
+[   13.116230] homeassistant kernel: Freeing unused kernel image (text/rodata gap) memory: 988K
+[   13.116645] homeassistant kernel: Freeing unused kernel image (rodata/data gap) memory: 452K
+[   13.116792] homeassistant kernel: x86/mm: Checked W+X mappings: passed, no W+X pages found.
+[   13.116910] homeassistant kernel: Run /sbin/init as init process
+[   13.117025] homeassistant kernel:   with arguments:
+[   13.117130] homeassistant kernel:     /sbin/init
+[   13.117224] homeassistant kernel:   with environment:
+[   13.124600] homeassistant kernel:     HOME=/
+[   13.124943] homeassistant kernel:     TERM=linux
+[   13.125868] homeassistant systemd[1]: systemd 256.17 running in system mode (+PAM +AUDIT -SELINUX +APPARMOR -IMA -SMACK +SECCOMP -GCRYPT -GNUTLS +OPENSSL -ACL +BLKID +CURL -ELFUTILS -FIDO2 -IDN2 -IDN +IPTC +KMOD +LIBCRYPTSETUP +LIBCRYPTSETUP_PLUGINS +LIBFDISK +PCRE2 -PWQUALITY -P11KIT -QRENCODE -TPM2 -BZIP2 -LZ4 -XZ +ZLIB -ZSTD -BPF_FRAMEWORK -XKBCOMMON -UTMP -SYSVINIT -LIBARCHIVE)
+[   13.126351] homeassistant systemd[1]: Detected virtualization qemu.
+[   13.126574] homeassistant systemd[1]: Detected architecture x86-64.
+[   13.126694] homeassistant systemd[1]: Hostname set to <homeassistant>.
+[   13.126826] homeassistant systemd[1]: Installed transient /etc/machine-id file.
+[   13.126945] homeassistant systemd[1]: Failed to create timezone change event source: No such file or directory
+[   13.133607] homeassistant systemd[1]: Using hardware watchdog 'iTCO_wdt', version 2, device /dev/watchdog0
+[   13.133863] homeassistant systemd[1]: Watchdog running with a hardware timeout of 5min.
+[   13.134308] homeassistant systemd[1]: Queued start job for default target Multi-User System.
+[   13.134628] homeassistant systemd[1]: Created slice Slice /system/ha-cli.
+[   13.134803] homeassistant systemd[1]: Created slice Slice /system/modprobe.
+[   13.134950] homeassistant systemd[1]: Created slice Slice /system/serial-getty.
+[   13.135826] homeassistant systemd[1]: Created slice Slice /system/systemd-fsck.
+[   13.136385] homeassistant systemd[1]: Created slice Slice /system/systemd-growfs.
+[   13.136749] homeassistant systemd[1]: Created slice User and Session Slice.
+[   13.136930] homeassistant systemd[1]: Started Dispatch Password Requests to Console Directory Watch.
+[   13.137224] homeassistant systemd[1]: Started Forward Password Requests to Wall Directory Watch.
+[   13.137538] homeassistant systemd[1]: Expecting device /dev/disk/by-label/hassos-boot...
+[   13.137748] homeassistant systemd[1]: Expecting device /dev/disk/by-label/hassos-data...
+[   13.137891] homeassistant systemd[1]: Expecting device /dev/disk/by-label/hassos-overlay...
+[   13.138005] homeassistant systemd[1]: Expecting device /dev/ttyS0...
+[   13.138276] homeassistant systemd[1]: Expecting device /dev/zram2...
+[   13.138453] homeassistant systemd[1]: Reached target Local Encrypted Volumes.
+[   13.138595] homeassistant systemd[1]: Reached target HAOS hardware targets.
+[   13.138708] homeassistant systemd[1]: Reached target HAOS zram targets.
+[   13.138834] homeassistant systemd[1]: Reached target Local Integrity Protected Volumes.
+[   13.138947] homeassistant systemd[1]: Reached target NFS client services.
+[   13.139305] homeassistant systemd[1]: Reached target Path Units.
+[   13.139496] homeassistant systemd[1]: Reached target Preparation for Remote File Systems.
+[   13.139620] homeassistant systemd[1]: Reached target Remote Encrypted Volumes.
+[   13.139813] homeassistant systemd[1]: Reached target Remote File Systems.
+[   13.140018] homeassistant systemd[1]: Reached target Remote Verity Protected Volumes.
+[   13.140455] homeassistant systemd[1]: Reached target Slice Units.
+[   13.140622] homeassistant systemd[1]: Reached target Local Verity Protected Volumes.
+[   13.140786] homeassistant systemd[1]: Listening on D-Bus System Message Bus Socket.
+[   13.140905] homeassistant systemd[1]: Listening on RPCbind Server Activation Socket.
+[   13.141020] homeassistant systemd[1]: Reached target RPC Port Mapper.
+[   13.141936] homeassistant systemd[1]: Listening on Process Core Dump Socket.
+[   13.145340] homeassistant systemd[1]: Listening on Credential Encryption/Decryption.
+[   13.145602] homeassistant systemd[1]: Listening on Journal Audit Socket.
+[   13.145829] homeassistant systemd[1]: Listening on Journal Socket (/dev/log).
+[   13.145958] homeassistant systemd[1]: Listening on Journal Sockets.
+[   13.147226] homeassistant systemd[1]: Listening on udev Control Socket.
+[   13.147526] homeassistant systemd[1]: Listening on udev Kernel Socket.
+[   13.147661] homeassistant systemd[1]: Mounting Huge Pages File System...
+[   13.147788] homeassistant systemd[1]: Mounting POSIX Message Queue File System...
+[   13.147909] homeassistant systemd[1]: Mounting Kernel Debug File System...
+[   13.148022] homeassistant systemd[1]: Mounting Kernel Trace File System...
+[   13.149636] homeassistant systemd[1]: Starting D-Bus System Message Bus...
+[   13.149841] homeassistant kernel: hrtimer: interrupt took 6084935 ns
+[   13.149961] homeassistant systemd[1]: Starting Create List of Static Device Nodes...
+[   13.153716] homeassistant systemd[1]: Starting Load Kernel Module configfs...
+[   13.153964] homeassistant systemd[1]: Starting Load Kernel Module drm...
+[   13.154180] homeassistant systemd[1]: Starting Load Kernel Module efi_pstore...
+[   13.154305] homeassistant systemd[1]: Starting Load Kernel Module fuse...
+[   13.154462] homeassistant systemd[1]: Starting Journal Service...
+[   13.154589] homeassistant systemd[1]: Starting Generate network units from Kernel command line...
+[   13.154701] homeassistant systemd[1]: Starting Remount Root and Kernel File Systems...
+[   13.154829] homeassistant systemd[1]: Starting Load udev Rules from Credentials...
+[   13.154941] homeassistant systemd[1]: Starting Coldplug All udev Devices...
+[   13.161604] homeassistant systemd[1]: Starting Disk Manager...
+[   13.161863] homeassistant systemd[1]: Starting HAOS ZRAM tmp...
+[   13.161991] homeassistant systemd[1]: Starting HAOS ZRAM var...
+[   13.162301] homeassistant systemd[1]: Mounted Huge Pages File System.
+[   13.162465] homeassistant systemd[1]: Mounted POSIX Message Queue File System.
+[   13.162591] homeassistant systemd[1]: Mounted Kernel Debug File System.
+[   13.162703] homeassistant systemd[1]: Mounted Kernel Trace File System.
+[   13.162829] homeassistant systemd[1]: Finished Create List of Static Device Nodes.
+[   13.162942] homeassistant systemd[1]: Starting Create Static Device Nodes in /dev gracefully...
+[   13.163147] homeassistant systemd[1]: modprobe@fuse.service: Deactivated successfully.
+[   13.163294] homeassistant systemd[1]: Finished Load Kernel Module fuse.
+[   13.163435] homeassistant systemd[1]: FUSE Control File System was skipped because of an unmet condition check (ConditionPathExists=/sys/fs/fuse/connections).
+[   13.163560] homeassistant systemd[1]: modprobe@drm.service: Deactivated successfully.
+[   13.163672] homeassistant systemd[1]: Finished Load Kernel Module drm.
+[   13.163865] homeassistant systemd[1]: modprobe@efi_pstore.service: Deactivated successfully.
+[   13.163997] homeassistant systemd[1]: Finished Load Kernel Module efi_pstore.
+[   13.165638] homeassistant systemd[1]: modprobe@configfs.service: Deactivated successfully.
+[   13.165864] homeassistant systemd[1]: Finished Load Kernel Module configfs.
+[   13.165996] homeassistant systemd[1]: Kernel Configuration File System was skipped because of an unmet condition check (ConditionPathExists=/sys/kernel/config).
+[   13.168198] homeassistant kernel: zram2: detected capacity change from 0 to 32768
+[   13.168446] homeassistant systemd[1]: Finished Remount Root and Kernel File Systems.
+[   13.168586] homeassistant kernel: zram1: detected capacity change from 0 to 65536
+[   13.168696] homeassistant systemd[1]: Started D-Bus System Message Bus.
+[   13.173885] homeassistant systemd-journald[134]: Collecting audit messages is enabled.
+[   13.174449] homeassistant kernel: audit: type=1130 audit(1793911875.050:2): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=dbus-broker comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   13.174628] homeassistant systemd[1]: Finished Generate network units from Kernel command line.
+[   13.174748] homeassistant kernel: audit: type=1130 audit(1793911875.098:3): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-network-generator comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   13.174875] homeassistant systemd[1]: Reached target Preparation for Network.
+[   13.174992] homeassistant systemd[1]: Finished Load udev Rules from Credentials.
+[   13.175099] homeassistant kernel: audit: type=1130 audit(1793911875.206:4): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-udev-load-credentials comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   13.175825] homeassistant systemd-journald[134]: Journal started
+[   13.177038] homeassistant systemd-journald[134]: Runtime Journal (/run/log/journal/372ff732d1104ff191128e1be68f10f1) is 4.9M, max 39.3M, 34.4M free.
+[   12.050007] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=dbus-broker comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   12.098002] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-network-generator comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   13.233717] homeassistant systemd[1]: Started Journal Service.
+[   12.206001] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-udev-load-credentials comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   12.877874] homeassistant dbus-broker-launch[128]: Ready
+[   13.295001] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-journald comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   13.334517] homeassistant kernel: audit: type=1130 audit(1793911876.295:5): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-journald comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   13.342508] homeassistant systemd[1]: Finished HAOS ZRAM var.
+[   13.349001] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=zram-var comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   13.393741] homeassistant kernel: audit: type=1130 audit(1793911876.349:6): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=zram-var comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   13.405811] homeassistant systemd[1]: Finished HAOS ZRAM tmp.
+[   13.413002] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=zram-tmp comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   13.438630] homeassistant kernel: audit: type=1130 audit(1793911876.413:7): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=zram-tmp comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   13.745570] homeassistant systemd[1]: Finished Create Static Device Nodes in /dev gracefully.
+[   13.754002] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-tmpfiles-setup-dev-early comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   13.777449] homeassistant kernel: audit: type=1130 audit(1793911876.754:8): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-tmpfiles-setup-dev-early comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   13.828650] homeassistant systemd[1]: Starting Create Static Device Nodes in /dev...
+[   13.855837] homeassistant udisksd[139]: udisks daemon version 2.10.1 starting
+[   14.518065] homeassistant systemd[1]: Finished Create Static Device Nodes in /dev.
+[   14.526001] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-tmpfiles-setup-dev comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   14.543385] homeassistant systemd[1]: Reached target Preparation for Local File Systems.
+[   14.549346] homeassistant kernel: audit: type=1130 audit(1793911877.526:9): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-tmpfiles-setup-dev comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   14.577003] homeassistant audit: BPF prog-id=6 op=LOAD
+[   14.588281] homeassistant kernel: audit: type=1334 audit(1793911877.577:10): prog-id=6 op=LOAD
+[   14.589003] homeassistant audit: BPF prog-id=7 op=LOAD
+[   14.607419] homeassistant kernel: audit: type=1334 audit(1793911877.589:11): prog-id=7 op=LOAD
+[   14.631027] homeassistant systemd[1]: Starting Rule-based Manager for Device Events and Files...
+[   15.085590] homeassistant systemd[1]: Finished Coldplug All udev Devices.
+[   15.090001] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-udev-trigger comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   15.158988] homeassistant systemd[1]: Started Disk Manager.
+[   15.152003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=udisks2 comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   15.171884] homeassistant udisksd[139]: Acquired the name org.freedesktop.UDisks2 on the system message bus
+[   15.532756] homeassistant systemd-udevd[175]: Using default interface naming scheme 'v255'.
+[   15.933968] homeassistant systemd[1]: Started Rule-based Manager for Device Events and Files.
+[   15.940002] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-udevd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   17.255144] homeassistant systemd[1]: Found device /dev/zram2.
+[   17.757831] homeassistant kernel: virtio_net virtio0 enp0s2: renamed from eth0
+[   17.928626] homeassistant systemd[1]: Found device /dev/ttyS0.
+[   18.161578] homeassistant systemd[1]: Found device /dev/disk/by-label/hassos-overlay.
+[   18.793820] homeassistant udisksd[139]: Error probing device: Error sending ATA command IDENTIFY PACKET DEVICE to '/dev/sr0': Unexpected sense data returned:
+                                           0000: f0 00 0b 00  58 00 01 0a  00 00 00 00  00 00 00 00    ....X...........
+                                           0010: 00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00    ................
+                                            (g-io-error-quark, 0)
+[   18.876295] homeassistant systemd[1]: Found device /dev/disk/by-label/hassos-boot.
+[   19.033557] homeassistant systemd[1]: Starting File System Check on /dev/disk/by-label/hassos-boot...
+[   19.076994] homeassistant systemd[1]: Starting File System Check on /dev/disk/by-label/hassos-overlay...
+[   20.500836] homeassistant systemd-fsck[209]: Cannot initialize conversion from codepage 850 to ANSI_X3.4-1968: Invalid argument
+[   20.500836] homeassistant systemd-fsck[209]: Cannot initialize conversion from ANSI_X3.4-1968 to codepage 850: Invalid argument
+[   20.500836] homeassistant systemd-fsck[209]: Using internal CP850 conversion table
+[   20.602602] homeassistant systemd-fsck[209]: fsck.fat 4.2 (2021-01-31)
+[   20.602602] homeassistant systemd-fsck[209]: Dirty bit is set. Fs was not properly unmounted and some data may be corrupt.
+[   20.602602] homeassistant systemd-fsck[209]:  Automatically removing dirty bit.
+[   20.602602] homeassistant systemd-fsck[209]: *** Filesystem was changed ***
+[   20.602602] homeassistant systemd-fsck[209]: Writing changes.
+[   20.602602] homeassistant systemd-fsck[209]: /dev/vda1: 10 files, 627/16343 clusters
+[   20.743117] homeassistant systemd[1]: Finished File System Check on /dev/disk/by-label/hassos-boot.
+[   20.803714] homeassistant kernel: kauditd_printk_skb: 3 callbacks suppressed
+[   20.811559] homeassistant kernel: audit: type=1130 audit(1793911883.776:15): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-fsck@dev-disk-by\x2dlabel-hassos\x2dboot comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   20.776001] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-fsck@dev-disk-by\x2dlabel-hassos\x2dboot comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   20.876353] homeassistant systemd[1]: Mounting HAOS boot partition...
+[   20.913676] homeassistant systemd-fsck[210]: e2fsck 1.47.2 (1-Jan-2025)
+[   20.954317] homeassistant systemd-fsck[210]: hassos-overlay: recovering journal
+[   21.141651] homeassistant systemd-fsck[210]: hassos-overlay: clean, 54/24576 files, 11898/98304 blocks
+[   21.213339] homeassistant nfsrahead[214]: skipping non-NFS device 11:0
+[   21.294717] homeassistant systemd[1]: Finished File System Check on /dev/disk/by-label/hassos-overlay.
+[   21.314004] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-fsck@dev-disk-by\x2dlabel-hassos\x2doverlay comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   21.348700] homeassistant kernel: audit: type=1130 audit(1793911884.314:16): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-fsck@dev-disk-by\x2dlabel-hassos\x2doverlay comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   21.422157] homeassistant nfsrahead[221]: skipping non-NFS device 7:1
+[   21.491011] homeassistant nfsrahead[222]: skipping non-NFS device 253:0
+[   21.493722] homeassistant nfsrahead[218]: skipping non-NFS device 7:7
+[   21.538717] homeassistant nfsrahead[223]: skipping non-NFS device 252:1
+[   21.544282] homeassistant nfsrahead[212]: skipping non-NFS device 252:0
+[   21.630708] homeassistant nfsrahead[217]: skipping non-NFS device 7:4
+[   21.681683] homeassistant nfsrahead[224]: skipping non-NFS device 7:2
+[   21.693160] homeassistant nfsrahead[220]: skipping non-NFS device 7:0
+[   21.699309] homeassistant nfsrahead[225]: skipping non-NFS device 7:3
+[   21.703704] homeassistant nfsrahead[219]: skipping non-NFS device 252:2
+[   21.737804] homeassistant nfsrahead[215]: skipping non-NFS device 7:6
+[   21.741580] homeassistant systemd[1]: Mounted HAOS boot partition.
+[   21.790390] homeassistant nfsrahead[216]: skipping non-NFS device 7:5
+[   21.811678] homeassistant systemd[1]: Starting Home Assistant OS Device Wipe Service...
+[   22.560686] homeassistant haos-wipe[229]: [ERROR] Data partition not found
+[   22.599277] homeassistant systemd[1]: haos-wipe.service: Main process exited, code=exited, status=1/FAILURE
+[   22.603349] homeassistant systemd[1]: haos-wipe.service: Failed with result 'exit-code'.
+[   22.608746] homeassistant systemd[1]: Failed to start Home Assistant OS Device Wipe Service.
+[   22.614003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=haos-wipe comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=failed'
+[   22.630394] homeassistant kernel: audit: type=1130 audit(1793911885.614:17): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=haos-wipe comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=failed'
+[   22.750755] homeassistant systemd[1]: Mounting HAOS overlay partition...
+[   23.122769] homeassistant systemd[1]: Starting Virtual Console Setup...
+[   23.245626] homeassistant kernel: EXT4-fs (vda7): mounted filesystem 0fa53c0a-9adc-4952-8b6e-4cd08186d2cb r/w with ordered data mode. Quota mode: none.
+[   23.282237] homeassistant systemd[1]: Mounted HAOS overlay partition.
+[   23.337484] homeassistant systemd[1]: Mounting Persistent /etc/default directory...
+[   23.399174] homeassistant systemd[1]: Mounting Dropbear persistent keys...
+[   23.409198] homeassistant systemd[1]: etc-modprobe.d.mount: Directory /etc/modprobe.d to mount over is not empty, mounting anyway.
+[   23.460247] homeassistant systemd[1]: Mounting Kernel persistent modprobe.d...
+[   23.521629] homeassistant systemd[1]: Mounting Kernel persistent modules-load.d...
+[   23.589476] homeassistant systemd[1]: Mounting Kernel persistent sysctl.d...
+[   23.645940] homeassistant systemd[1]: Mounting Udev persistent rules.d...
+[   23.726287] homeassistant systemd[1]: Mounting USB modeswitch persistent directory...
+[   23.823524] homeassistant systemd[1]: Mounting Docker persistent user...
+[   23.867047] homeassistant systemd[1]: Mounting Dropbear persistent user...
+[   23.931245] homeassistant systemd[1]: Starting HAOS overlay setup...
+[   24.391014] homeassistant systemd[1]: Mounted Persistent /etc/default directory.
+[   24.577589] homeassistant systemd[1]: Mounted Dropbear persistent keys.
+[   24.913101] homeassistant systemd[1]: Mounted Kernel persistent modprobe.d.
+[   24.929644] homeassistant systemd[1]: Mounted Kernel persistent modules-load.d.
+[   24.938312] homeassistant systemd[1]: Mounted Kernel persistent sysctl.d.
+[   24.949762] homeassistant systemd[1]: Mounted Udev persistent rules.d.
+[   25.079763] homeassistant systemd[1]: Starting Retrigger udev rules after user rules mounted...
+[   25.108761] homeassistant systemd[1]: Load Kernel Modules was skipped because no trigger condition checks were met.
+[   25.153703] homeassistant systemd[1]: Starting Apply Kernel Variables...
+[   25.280564] homeassistant systemd[1]: Mounted Docker persistent user.
+[   25.440005] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-vconsole-setup comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   25.426966] homeassistant systemd[1]: Finished Virtual Console Setup.
+[   25.514295] homeassistant kernel: audit: type=1130 audit(1793911888.440:18): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-vconsole-setup comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   25.527591] homeassistant systemd[1]: Mounted USB modeswitch persistent directory.
+[   25.674924] homeassistant systemd[1]: Mounted Dropbear persistent user.
+[   25.780217] homeassistant systemd[1]: Finished HAOS overlay setup.
+[   25.784002] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=haos-overlay comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   25.809632] homeassistant kernel: audit: type=1130 audit(1793911888.784:19): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=haos-overlay comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   25.860535] homeassistant systemd[1]: Mounting NetworkManager persistent system connections...
+[   25.872452] homeassistant systemd[1]: etc-hostname.mount: Failed to create mount point '/etc/hostname', ignoring: Read-only file system
+[   25.907195] homeassistant systemd[1]: Mounting Hostname persistent configuration...
+[   25.929838] homeassistant systemd[1]: etc-hosts.mount: Failed to create mount point '/etc/hosts', ignoring: Read-only file system
+[   25.964813] homeassistant systemd[1]: Mounting Hosts persistent configuration...
+[   26.034471] homeassistant systemd[1]: Mounting Timesyncd persistent configuration...
+[   26.688666] homeassistant systemd[1]: Finished Apply Kernel Variables.
+[   26.697004] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-sysctl comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   26.702692] homeassistant kernel: audit: type=1130 audit(1793911889.697:20): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-sysctl comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   26.711595] homeassistant systemd[1]: Mounted NetworkManager persistent system connections.
+[   26.756514] homeassistant systemd[1]: Mounted Hostname persistent configuration.
+[   26.766391] homeassistant systemd[1]: Mounted Hosts persistent configuration.
+[   26.777280] homeassistant systemd[1]: Mounted Timesyncd persistent configuration.
+[   29.539731] homeassistant systemd[1]: Finished Retrigger udev rules after user rules mounted.
+[   29.563004] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=haos-user-rules-udev-trigger comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   29.572871] homeassistant kernel: audit: type=1130 audit(1793911892.563:21): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=haos-user-rules-udev-trigger comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   32.104645] homeassistant nfsrahead[313]: skipping non-NFS device 7:0
+[   32.185491] homeassistant nfsrahead[311]: skipping non-NFS device 7:2
+[   32.202331] homeassistant nfsrahead[306]: skipping non-NFS device 253:0
+[   32.223201] homeassistant nfsrahead[312]: skipping non-NFS device 7:3
+[   32.338039] homeassistant nfsrahead[307]: skipping non-NFS device 252:2
+[   32.360861] homeassistant nfsrahead[305]: skipping non-NFS device 252:1
+[   32.412156] homeassistant nfsrahead[310]: skipping non-NFS device 11:0
+[   32.416387] homeassistant nfsrahead[309]: skipping non-NFS device 252:0
+[   32.504217] homeassistant nfsrahead[315]: skipping non-NFS device 7:4
+[   32.550768] homeassistant nfsrahead[314]: skipping non-NFS device 7:5
+[   32.554176] homeassistant nfsrahead[308]: skipping non-NFS device 7:1
+[   32.770609] homeassistant nfsrahead[318]: skipping non-NFS device 7:7
+[   32.866380] homeassistant nfsrahead[316]: skipping non-NFS device 7:6
+[   33.020797] homeassistant udisksd[139]: Error probing device: Error sending ATA command IDENTIFY PACKET DEVICE to '/dev/sr0': Unexpected sense data returned:
+                                           0000: f0 00 0b 00  58 00 01 0a  00 00 00 00  00 00 00 00    ....X...........
+                                           0010: 00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00    ................
+                                            (g-io-error-quark, 0)
+[   33.997161] homeassistant systemd[1]: systemd-vconsole-setup.service: Deactivated successfully.
+[   34.009599] homeassistant systemd[1]: Stopped Virtual Console Setup.
+[   34.016381] homeassistant kernel: audit: type=1131 audit(1793911897.011:22): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-vconsole-setup comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   34.011001] homeassistant audit[1]: SERVICE_STOP pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-vconsole-setup comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   34.018989] homeassistant systemd[1]: Stopping Virtual Console Setup...
+[   34.050007] homeassistant systemd[1]: Starting Virtual Console Setup...
+[   34.092367] homeassistant systemd[1]: run-credentials-systemd\x2dvconsole\x2dsetup.service.mount: Deactivated successfully.
+[   34.713870] homeassistant systemd[1]: Finished Virtual Console Setup.
+[   34.732565] homeassistant kernel: audit: type=1130 audit(1793911897.729:23): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-vconsole-setup comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   34.729001] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-vconsole-setup comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   99.396341] homeassistant systemd[1]: dev-disk-by\x2dlabel-hassos\x2ddata.device: Job dev-disk-by\x2dlabel-hassos\x2ddata.device/start timed out.
+[   99.397632] homeassistant systemd[1]: Timed out waiting for device /dev/disk/by-label/hassos-data.
+[   99.402348] homeassistant systemd[1]: Dependency failed for File System Check on /dev/disk/by-label/hassos-data.
+[   99.406654] homeassistant systemd[1]: systemd-fsck@dev-disk-by\x2dlabel-hassos\x2ddata.service: Job systemd-fsck@dev-disk-by\x2dlabel-hassos\x2ddata.service/start failed with result 'dependency'.
+[   99.407520] homeassistant systemd[1]: Dependency failed for Home Assistant OS data partition migration.
+[   99.410001] homeassistant systemd[1]: haos-data.service: Job haos-data.service/start failed with result 'dependency'.
+[   99.410305] homeassistant systemd[1]: Dependency failed for HAOS data partition.
+[   99.412812] homeassistant systemd[1]: Dependency failed for Grow File System on /mnt/data.
+[   99.414816] homeassistant systemd[1]: systemd-growfs@mnt-data.service: Job systemd-growfs@mnt-data.service/start failed with result 'dependency'.
+[   99.415012] homeassistant systemd[1]: Dependency failed for Ensure rauc.db contains version information.
+[   99.417450] homeassistant systemd[1]: raucdb-update.service: Job raucdb-update.service/start failed with result 'dependency'.
+[   99.417752] homeassistant systemd[1]: Dependency failed for Reset Docker Storage.
+[   99.419524] homeassistant systemd[1]: haos-docker-reset.service: Job haos-docker-reset.service/start failed with result 'dependency'.
+[   99.419695] homeassistant systemd[1]: Dependency failed for Docker Application Container Engine.
+[   99.421456] homeassistant systemd[1]: Dependency failed for HAOS supervisor.
+[   99.423806] homeassistant systemd[1]: haos-supervisor.service: Job haos-supervisor.service/start failed with result 'dependency'.
+[   99.424211] homeassistant systemd[1]: docker.service: Job docker.service/start failed with result 'dependency'.
+[   99.424463] homeassistant systemd[1]: Dependency failed for HAOS swap.
+[   99.426176] homeassistant systemd[1]: haos-swapfile.service: Job haos-swapfile.service/start failed with result 'dependency'.
+[   99.426307] homeassistant systemd[1]: Dependency failed for Docker environment and config initialization.
+[   99.428756] homeassistant systemd[1]: docker-prepare.service: Job docker-prepare.service/start failed with result 'dependency'.
+[   99.428898] homeassistant systemd[1]: Dependency failed for Systemd persistent logging.
+[   99.432105] homeassistant systemd[1]: Dependency failed for Flush Journal to Persistent Storage.
+[   99.434669] homeassistant systemd[1]: systemd-journal-flush.service: Job systemd-journal-flush.service/start failed with result 'dependency'.
+[   99.434824] homeassistant systemd[1]: var-log-journal.mount: Job var-log-journal.mount/start failed with result 'dependency'.
+[   99.434901] homeassistant systemd[1]: Dependency failed for HAOS swap file.
+[   99.436906] homeassistant systemd[1]: mnt-data-swapfile.swap: Job mnt-data-swapfile.swap/start failed with result 'dependency'.
+[   99.437028] homeassistant systemd[1]: Dependency failed for Docker persistent data.
+[   99.440263] homeassistant systemd[1]: var-lib-docker.mount: Job var-lib-docker.mount/start failed with result 'dependency'.
+[   99.440480] homeassistant systemd[1]: Dependency failed for HAOS AppArmor.
+[   99.442654] homeassistant systemd[1]: haos-apparmor.service: Job haos-apparmor.service/start failed with result 'dependency'.
+[   99.442918] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   99.443069] homeassistant systemd[1]: Dependency failed for HAOS data resizing.
+[   99.447157] homeassistant systemd[1]: haos-expand.service: Job haos-expand.service/start failed with result 'dependency'.
+[   99.447588] homeassistant systemd[1]: Dependency failed for HAOS data disk detach.
+[   99.449182] homeassistant systemd[1]: haos-data-disk-detach.service: Job haos-data-disk-detach.service/start failed with result 'dependency'.
+[   99.449518] homeassistant systemd[1]: dev-disk-by\x2dlabel-hassos\x2ddata.device: Job dev-disk-by\x2dlabel-hassos\x2ddata.device/start failed with result 'timeout'.
+[   99.478287] homeassistant systemd[1]: Reached target Swaps.
+[   99.505603] homeassistant systemd[1]: Mounting Temporary Directory /tmp...
+[   99.507994] homeassistant systemd[1]: var.mount: Directory /var to mount over is not empty, mounting anyway.
+[   99.528453] homeassistant systemd[1]: Mounting Buildroot /var tmpfs...
+[   99.724311] homeassistant kernel: EXT4-fs (zram2): mounted filesystem 79c74367-d4e2-45c3-a16d-4940b52ac91b r/w without journal. Quota mode: none.
+[   99.747643] homeassistant systemd[1]: Mounted Temporary Directory /tmp.
+[   99.785331] homeassistant systemd[1]: Mounted Buildroot /var tmpfs.
+[   99.821620] homeassistant systemd[1]: Mounting NetworkManager persistent data...
+[   99.837512] homeassistant systemd[1]: Mounting Bluetooth persistent state...
+[   99.855919] homeassistant systemd[1]: Mounting Systemd persistent state...
+[  100.076060] homeassistant systemd[1]: Mounted NetworkManager persistent data.
+[  100.081946] homeassistant systemd[1]: Mounted Bluetooth persistent state.
+[  100.087337] homeassistant systemd[1]: Mounted Systemd persistent state.
+[  100.107777] homeassistant systemd[1]: Reached target HAOS overlay targets.
+[  100.111264] homeassistant systemd[1]: Reached target Local File Systems.
+[  100.114289] homeassistant systemd[1]: Platform Persistent Storage Archival was skipped because of an unmet condition check (ConditionDirectoryNotEmpty=/sys/fs/pstore).
+[  100.131326] homeassistant systemd[1]: Starting Load/Save OS Random Seed...
+[  100.145535] homeassistant systemd[1]: Starting Create System Files and Directories...
+[  100.411998] homeassistant systemd-tmpfiles[343]: /usr/lib/tmpfiles.d/dbus.conf:5: Duplicate line for path "/var/lib/dbus", ignoring.
+[  100.420677] homeassistant systemd[1]: Finished Load/Save OS Random Seed.
+[  100.425004] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-random-seed comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  100.429600] homeassistant kernel: audit: type=1130 audit(1793911963.425:24): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-random-seed comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  100.431985] homeassistant systemd-tmpfiles[343]: /usr/lib/tmpfiles.d/systemd-pstore.conf:32: Duplicate line for path "/var/lib/systemd/pstore", ignoring.
+[  100.432470] homeassistant systemd[1]: First Boot Complete was skipped because of an unmet condition check (ConditionFirstBoot=yes).
+[  100.434705] homeassistant systemd[1]: Save Transient machine-id to Disk was skipped because of an unmet condition check (ConditionPathIsReadWrite=/etc).
+[  100.516033] homeassistant systemd-tmpfiles[343]: /usr/lib/tmpfiles.d/systemd.conf:28: Duplicate line for path "/var/lib/systemd", ignoring.
+[  100.516449] homeassistant systemd-tmpfiles[343]: /usr/lib/tmpfiles.d/systemd.conf:29: Duplicate line for path "/var/lib/systemd/coredump", ignoring.
+[  100.516751] homeassistant systemd-tmpfiles[343]: /usr/lib/tmpfiles.d/systemd.conf:35: Duplicate line for path "/var/lib/private", ignoring.
+[  100.518510] homeassistant systemd-tmpfiles[343]: /usr/lib/tmpfiles.d/var.conf:14: Duplicate line for path "/var/log", ignoring.
+[  100.518637] homeassistant systemd-tmpfiles[343]: /usr/lib/tmpfiles.d/var.conf:16: Duplicate line for path "/var/cache", ignoring.
+[  100.518704] homeassistant systemd-tmpfiles[343]: /usr/lib/tmpfiles.d/var.conf:18: Duplicate line for path "/var/lib", ignoring.
+[  100.518780] homeassistant systemd-tmpfiles[343]: /usr/lib/tmpfiles.d/var.conf:20: Duplicate line for path "/var/spool", ignoring.
+[  100.589296] homeassistant systemd-tmpfiles[343]: Failed to create directory or subvolume "/mnt/data/supervisor": Read-only file system
+[  100.627327] homeassistant systemd-tmpfiles[343]: '/var/lib/NetworkManager/internal-793a1c37-0aec-3b96-853a-44e936249348-enp0s2.lease' already exists and is not a directory.
+[  100.646776] homeassistant systemd[1]: Finished Create System Files and Directories.
+[  100.651001] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-tmpfiles-setup comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  100.652687] homeassistant kernel: audit: type=1130 audit(1793911963.651:25): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-tmpfiles-setup comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  100.699529] homeassistant systemd[1]: Starting Security Auditing Service...
+[  100.726004] homeassistant audit: BPF prog-id=8 op=LOAD
+[  100.729495] homeassistant kernel: audit: type=1334 audit(1793911963.726:26): prog-id=8 op=LOAD
+[  100.748945] homeassistant systemd[1]: Starting Network Name Resolution...
+[  101.234740] homeassistant auditd[350]: No plugins found, not dispatching events
+[  101.261004] homeassistant audit: CONFIG_CHANGE op=set audit_enabled=1 old=1 auid=4294967295 ses=4294967295 subj=unconfined res=1
+[  101.266541] homeassistant kernel: audit: type=1305 audit(1793911964.261:27): op=set audit_enabled=1 old=1 auid=4294967295 ses=4294967295 subj=unconfined res=1
+[  101.266875] homeassistant kernel: audit: type=1300 audit(1793911964.261:27): arch=c000003e syscall=44 success=yes exit=60 a0=3 a1=7ffd0ad80600 a2=3c a3=0 items=0 ppid=347 pid=350 auid=4294967295 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=(none) ses=4294967295 comm="auditd" exe="/usr/sbin/auditd" subj=unconfined key=(null)
+[  101.261001] homeassistant audit[350]: SYSCALL arch=c000003e syscall=44 success=yes exit=60 a0=3 a1=7ffd0ad80600 a2=3c a3=0 items=0 ppid=347 pid=350 auid=4294967295 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=(none) ses=4294967295 comm="auditd" exe="/usr/sbin/auditd" subj=unconfined key=(null)
+[  101.270325] homeassistant kernel: audit: type=1327 audit(1793911964.261:27): proctitle="/sbin/auditd"
+[  101.261001] homeassistant audit: PROCTITLE proctitle="/sbin/auditd"
+[  101.267000] homeassistant audit: CONFIG_CHANGE op=set audit_pid=350 old=0 auid=4294967295 ses=4294967295 subj=unconfined res=1
+[  101.267001] homeassistant audit[350]: SYSCALL arch=c000003e syscall=44 success=yes exit=60 a0=3 a1=7ffd0ad7e2b0 a2=3c a3=0 items=0 ppid=347 pid=350 auid=4294967295 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=(none) ses=4294967295 comm="auditd" exe="/usr/sbin/auditd" subj=unconfined key=(null)
+[  101.267000] homeassistant audit: PROCTITLE proctitle="/sbin/auditd"
+[  101.271665] homeassistant auditd[350]: Init complete, auditd 3.1.5 listening for events (startup state enable)
+[  101.717013] homeassistant augenrules[354]: /sbin/augenrules: No rules directory - /etc/audit/rules.d
+[  101.848927] homeassistant auditctl[357]: audit rules file /etc/audit/audit.rules doesn't exist
+[  101.863479] homeassistant systemd-resolved[348]: Positive Trust Anchors:
+[  101.863761] homeassistant systemd[1]: Started Security Auditing Service.
+[  101.864001] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=auditd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  101.865234] homeassistant systemd-resolved[348]: . IN DS 20326 8 2 e06d44b80b8f1d39a95c0b0d7c65d08458e880409bbc683457104237c7f8ec8d
+[  101.865363] homeassistant systemd-resolved[348]: . IN DS 38696 8 2 683d2d0acb8c9b712a1948b27f741219298d0a450d612c483af444a4c0fb2b16
+[  101.866376] homeassistant systemd-resolved[348]: Negative trust anchors: home.arpa 10.in-addr.arpa 16.172.in-addr.arpa 17.172.in-addr.arpa 18.172.in-addr.arpa 19.172.in-addr.arpa 20.172.in-addr.arpa 21.172.in-addr.arpa 22.172.in-addr.arpa 23.172.in-addr.arpa 24.172.in-addr.arpa 25.172.in-addr.arpa 26.172.in-addr.arpa 27.172.in-addr.arpa 28.172.in-addr.arpa 29.172.in-addr.arpa 30.172.in-addr.arpa 31.172.in-addr.arpa 170.0.0.192.in-addr.arpa 171.0.0.192.in-addr.arpa 168.192.in-addr.arpa d.f.ip6.arpa ipv4only.arpa resolver.arpa corp home internal intranet lan local private test
+[  101.995614] homeassistant systemd-resolved[348]: Using system hostname 'homeassistant'.
+[  102.055603] homeassistant systemd[1]: Started Network Name Resolution.
+[  102.060002] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-resolved comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  102.066506] homeassistant systemd[1]: Reached target Host and Network Name Lookups.
+[  102.070242] homeassistant systemd[1]: Reached target System Initialization.
+[  102.074951] homeassistant systemd[1]: Started Daily Cleanup of Temporary Directories.
+[  102.093446] homeassistant systemd[1]: Starting Docker Socket for the API...
+[  102.098951] homeassistant systemd[1]: Listening on Hostname Service Socket.
+[  102.107618] homeassistant systemd[1]: Listening on Journal Gateway Service Socket.
+[  102.140838] homeassistant systemd[1]: Starting Home Assistant OS Agent...
+[  102.194668] homeassistant systemd[1]: Listening on Docker Socket for the API.
+[  102.205814] homeassistant systemd[1]: Reached target Socket Units.
+[  102.209457] homeassistant systemd[1]: Reached target Basic System.
+[  102.215686] homeassistant systemd[1]: System is tainted: unmerged-bin
+[  102.244057] homeassistant systemd[1]: Starting Network Manager...
+[  102.281307] homeassistant systemd[1]: Starting Configure multigenerational LRU...
+[  102.319802] homeassistant systemd[1]: Starting HAOS persists data on bootstate...
+[  102.373420] homeassistant systemd[1]: Starting RAUC Update Service...
+[  102.426829] homeassistant systemd[1]: Starting RPC Bind...
+[  102.460004] homeassistant audit: BPF prog-id=9 op=LOAD
+[  102.464002] homeassistant audit: BPF prog-id=10 op=LOAD
+[  102.471003] homeassistant audit: BPF prog-id=11 op=LOAD
+[  102.508046] homeassistant systemd[1]: Starting User Login Management...
+[  102.542723] homeassistant systemd[1]: Starting WPA supplicant...
+[  102.741541] homeassistant systemd[1]: haos-mglru.service: Deactivated successfully.
+[  102.741984] homeassistant (rpcbind)[366]: rpcbind.service: Referenced but unset environment variable evaluates to an empty string: RPCBIND_OPTIONS
+[  102.750797] homeassistant systemd[1]: Finished Configure multigenerational LRU.
+[  102.760003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=haos-mglru comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  102.760001] homeassistant audit[1]: SERVICE_STOP pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=haos-mglru comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  103.028708] homeassistant systemd[1]: Started RPC Bind.
+[  103.031001] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=rpcbind comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  103.442929] homeassistant rauc[365]: Using central status file /mnt/boot/rauc.db
+[  103.477756] homeassistant rauc[365]: Using system config file /etc/rauc/system.conf
+[  103.556577] homeassistant rauc[365]: Booted into kernel.0 (A)
+[  103.678579] homeassistant haos-persists[364]: [INFO] machine-id is okay
+[  103.691249] homeassistant wpa_supplicant[368]: Successfully initialized wpa_supplicant
+[  103.716471] homeassistant systemd[1]: Finished HAOS persists data on bootstate.
+[  103.726004] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=haos-persists comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  103.736713] homeassistant systemd[1]: Started WPA supplicant.
+[  103.754003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=wpa_supplicant comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  103.833131] homeassistant os-agent[361]: INFO: 2026/11/05 20:52:46 main.go:36: Start OS-Agent 1.14.0
+[  103.861372] homeassistant systemd[1]: Started RAUC Update Service.
+[  103.866003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=rauc comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  103.981820] homeassistant os-agent[361]: INFO: 2026/11/05 20:52:46 main.go:128: Exposing object /io/hass/os with interface io.hass.os ...
+[  103.981820] homeassistant os-agent[361]: INFO: 2026/11/05 20:52:46 main.go:69: Listening on service io.hass.os ...
+[  103.992903] homeassistant NetworkManager[362]: <info>  [1793911966.9906] NetworkManager (version 1.50.2) is starting... (boot:b4be6629-07e7-416e-9fe8-ff094e10e366)
+[  104.007321] homeassistant os-agent[361]: WARNING: 2026/11/05 20:52:46 datadisk.go:106: can't find a data mount
+[  104.007321] homeassistant os-agent[361]: INFO: 2026/11/05 20:52:46 datadisk.go:154: Exposing object /io/hass/os/DataDisk with interface io.hass.os.DataDisk ...
+[  104.007321] homeassistant os-agent[361]: INFO: 2026/11/05 20:52:47 system.go:280: Exposing object /io/hass/os/System with interface io.hass.os.System ...
+[  104.010340] homeassistant NetworkManager[362]: <info>  [1793911967.0098] Read config: /etc/NetworkManager/NetworkManager.conf
+[  104.051737] homeassistant systemd-logind[367]: Watching system buttons on /dev/input/event1 (AT Translated Set 2 keyboard)
+[  104.075616] homeassistant systemd-logind[367]: New seat seat0.
+[  104.125005] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-logind comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  104.118065] homeassistant systemd[1]: Started User Login Management.
+[  104.267515] homeassistant os-agent[361]: INFO: 2026/11/05 20:52:47 apparmor.go:199: Exposing object /io/hass/os/AppArmor with interface io.hass.os.AppArmor ...
+[  104.271622] homeassistant os-agent[361]: INFO: 2026/11/05 20:52:47 cgroup.go:119: Detected CGroups Version 2
+[  104.284396] homeassistant os-agent[361]: INFO: 2026/11/05 20:52:47 cgroup.go:147: Exposing object /io/hass/os/CGroup with interface io.hass.os.CGroup ...
+[  104.287200] homeassistant os-agent[361]: INFO: 2026/11/05 20:52:47 boards.go:70: Exposing object /io/hass/os/Boards with interface io.hass.os.Boards ...
+[  104.287200] homeassistant os-agent[361]: INFO: 2026/11/05 20:52:47 boards.go:84: No specific Board features for GenericAmd64
+[  104.300366] homeassistant os-agent[361]: INFO: 2026/11/05 20:52:47 swap.go:178: Exposing object /io/hass/os/Config/Swap with interface io.hass.os.Config.Swap ...
+[  104.304896] homeassistant os-agent[361]: INFO: 2026/11/05 20:52:47 timesyncd.go:157: Exposing object /io/hass/os/Config/Timesyncd with interface io.hass.os.Config.Timesyncd ...
+[  104.309347] homeassistant systemd[1]: Started Home Assistant OS Agent.
+[  104.321003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=haos-agent comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  104.337719] homeassistant kernel: cfg80211: Loading compiled-in X.509 certificates for regulatory database
+[  104.377300] homeassistant NetworkManager[362]: <info>  [1793911967.3768] manager[0x55841f69e6b0]: monitoring kernel firmware directory '/lib/firmware'.
+[  104.418295] homeassistant systemd[1]: Expecting device /dev/disk/by-label/hassos-data...
+[  104.431005] homeassistant audit: BPF prog-id=12 op=LOAD
+[  104.435003] homeassistant audit: BPF prog-id=13 op=LOAD
+[  104.436001] homeassistant audit: BPF prog-id=14 op=LOAD
+[  104.449177] homeassistant systemd[1]: Starting Hostname Service...
+[  104.499563] homeassistant kernel: Loaded X.509 cert 'sforshee: 00b28ddf47aef9cea7'
+[  104.500501] homeassistant kernel: Loaded X.509 cert 'wens: 61c038651aabdcf94bd0ac7ff06c7248db18c600'
+[  105.388404] homeassistant systemd[1]: Started Hostname Service.
+[  105.390003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-hostnamed comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  105.457833] homeassistant NetworkManager[362]: <info>  [1793911968.4570] hostname: hostname: using hostnamed
+[  105.458550] homeassistant NetworkManager[362]: <info>  [1793911968.4583] hostname: static hostname changed from (none) to "homeassistant"
+[  105.470684] homeassistant NetworkManager[362]: <info>  [1793911968.4704] dns-mgr: init: dns=default,systemd-resolved rc-manager=file
+[  105.480498] homeassistant NetworkManager[362]: <info>  [1793911968.4800] manager[0x55841f69e6b0]: rfkill: Wi-Fi hardware radio set enabled
+[  105.480921] homeassistant NetworkManager[362]: <info>  [1793911968.4807] manager[0x55841f69e6b0]: rfkill: WWAN hardware radio set enabled
+[  105.532646] homeassistant NetworkManager[362]: <info>  [1793911968.5323] Loaded device plugin: NMAtmManager (/usr/lib/NetworkManager/1.50.2/libnm-device-plugin-adsl.so)
+[  105.537050] homeassistant NetworkManager[362]: <info>  [1793911968.5368] Loaded device plugin: NMWifiFactory (/usr/lib/NetworkManager/1.50.2/libnm-device-plugin-wifi.so)
+[  105.538951] homeassistant NetworkManager[362]: <info>  [1793911968.5388] manager: rfkill: Wi-Fi enabled by radio killswitch; enabled by state file
+[  105.540728] homeassistant NetworkManager[362]: <info>  [1793911968.5405] manager: rfkill: WWAN enabled by radio killswitch; enabled by state file
+[  105.541872] homeassistant NetworkManager[362]: <info>  [1793911968.5416] manager: Networking is enabled by state file
+[  105.557181] homeassistant NetworkManager[362]: <info>  [1793911968.5570] settings: Loaded settings plugin: keyfile (internal)
+[  105.585052] homeassistant NetworkManager[362]: <info>  [1793911968.5847] dhcp: init: Using DHCP client 'internal'
+[  105.592194] homeassistant NetworkManager[362]: <info>  [1793911968.5918] manager: (lo): new Loopback device (/org/freedesktop/NetworkManager/Devices/1)
+[  105.612003] homeassistant systemd[1]: Starting Network Manager Script Dispatcher Service...
+[  105.651026] homeassistant NetworkManager[362]: <info>  [1793911968.6507] device (lo): state change: unmanaged -> unavailable (reason 'connection-assumed', managed-type: 'external')
+[  105.660885] homeassistant NetworkManager[362]: <info>  [1793911968.6606] device (lo): state change: unavailable -> disconnected (reason 'connection-assumed', managed-type: 'external')
+[  105.681461] homeassistant NetworkManager[362]: <info>  [1793911968.6812] device (lo): Activation: starting connection 'lo' (b991d7e4-2d93-479c-9742-978db0a7d03b)
+[  105.705672] homeassistant NetworkManager[362]: <info>  [1793911968.7049] manager: (enp0s2): new Ethernet device (/org/freedesktop/NetworkManager/Devices/2)
+[  105.743767] homeassistant NetworkManager[362]: <info>  [1793911968.7435] settings: (enp0s2): created default wired connection 'Wired connection 1'
+[  105.744698] homeassistant NetworkManager[362]: <info>  [1793911968.7445] device (enp0s2): state change: unmanaged -> unavailable (reason 'managed', managed-type: 'external')
+[  105.810948] homeassistant systemd[1]: Started Network Manager.
+[  105.812145] homeassistant NetworkManager[362]: <info>  [1793911968.8118] bus-manager: acquired D-Bus service "org.freedesktop.NetworkManager"
+[  105.809242] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=NetworkManager comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  105.824381] homeassistant systemd[1]: Reached target Network.
+[  105.835388] homeassistant NetworkManager[362]: <info>  [1793911968.8350] device (lo): state change: disconnected -> prepare (reason 'none', managed-type: 'external')
+[  105.841069] homeassistant NetworkManager[362]: <info>  [1793911968.8408] device (lo): state change: prepare -> config (reason 'none', managed-type: 'external')
+[  105.844155] homeassistant NetworkManager[362]: <info>  [1793911968.8439] device (lo): state change: config -> ip-config (reason 'none', managed-type: 'external')
+[  105.849328] homeassistant NetworkManager[362]: <info>  [1793911968.8488] device (enp0s2): carrier: link connected
+[  105.851607] homeassistant systemd[1]: Starting Network Manager Wait Online...
+[  105.871657] homeassistant systemd[1]: Starting containerd container runtime...
+[  105.877844] homeassistant systemd[1]: Dropbear SSH daemon was skipped because of an unmet condition check (ConditionFileNotEmpty=/root/.ssh/authorized_keys).
+[  105.880611] homeassistant NetworkManager[362]: <info>  [1793911968.8802] device (lo): state change: ip-config -> ip-check (reason 'none', managed-type: 'external')
+[  105.906358] homeassistant systemd[1]: Starting HAOS Configuration Manager...
+[  105.931954] homeassistant systemd[1]: Starting Permit User Sessions...
+[  105.934621] homeassistant systemd[1]: vmtoolsd for openvmtools was skipped because of an unmet condition check (ConditionVirtualization=vmware).
+[  105.943498] homeassistant NetworkManager[362]: <info>  [1793911968.9349] device (enp0s2): state change: unavailable -> disconnected (reason 'carrier-changed', managed-type: 'full')
+[  105.996598] homeassistant NetworkManager[362]: <info>  [1793911968.9930] policy: auto-activating connection 'Wired connection 1' (793a1c37-0aec-3b96-853a-44e936249348)
+[  106.019705] homeassistant NetworkManager[362]: <info>  [1793911969.0194] device (enp0s2): Activation: starting connection 'Wired connection 1' (793a1c37-0aec-3b96-853a-44e936249348)
+[  106.026725] homeassistant NetworkManager[362]: <info>  [1793911969.0264] device (enp0s2): state change: disconnected -> prepare (reason 'none', managed-type: 'full')
+[  106.059005] homeassistant NetworkManager[362]: <info>  [1793911969.0490] manager: NetworkManager state is now CONNECTING
+[  106.066938] homeassistant NetworkManager[362]: <info>  [1793911969.0667] device (enp0s2): state change: prepare -> config (reason 'none', managed-type: 'full')
+[  106.125864] homeassistant NetworkManager[362]: <info>  [1793911969.1256] device (enp0s2): state change: config -> ip-config (reason 'none', managed-type: 'full')
+[  106.158841] homeassistant NetworkManager[362]: <info>  [1793911969.1585] dhcp4 (enp0s2): activation: beginning transaction (timeout in 45 seconds)
+[  106.242548] homeassistant NetworkManager[362]: <info>  [1793911969.2423] dhcp4 (enp0s2): state changed new lease, address=10.0.2.15, acd pending
+[  106.253238] homeassistant systemd-resolved[348]: enp0s2: Bus client set default route setting: no
+[  106.253463] homeassistant systemd[1]: Started Network Manager Script Dispatcher Service.
+[  106.262003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=NetworkManager-dispatcher comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  106.345975] homeassistant systemd[1]: Finished Permit User Sessions.
+[  106.351001] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-user-sessions comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  106.360276] homeassistant NetworkManager[362]: <info>  [1793911969.3599] device (lo): state change: ip-check -> secondaries (reason 'none', managed-type: 'external')
+[  106.364843] homeassistant NetworkManager[362]: <info>  [1793911969.3638] device (lo): state change: secondaries -> activated (reason 'none', managed-type: 'external')
+[  106.377986] homeassistant systemd[1]: Started Home Assistant CLI.
+[  106.386003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=ha-cli@tty1 comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  106.395852] homeassistant NetworkManager[362]: <info>  [1793911969.3950] device (lo): Activation: successful, device activated.
+[  106.410003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=serial-getty@ttyS0 comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  106.404209] homeassistant systemd[1]: Started Serial Getty on ttyS0.
+[  106.412361] homeassistant systemd[1]: Reached target Login Prompts.
+[  106.506798] homeassistant NetworkManager[362]: <info>  [1793911969.5065] dhcp4 (enp0s2): state changed new lease, address=10.0.2.15
+[  106.522314] homeassistant NetworkManager[362]: <info>  [1793911969.5220] policy: set 'Wired connection 1' (enp0s2) as default for IPv4 routing and DNS
+[  107.006876] homeassistant systemd-resolved[348]: enp0s2: Bus client set default route setting: yes
+[  107.073670] homeassistant systemd-resolved[348]: enp0s2: Bus client set DNS server list to: 10.0.2.3
+[  107.115925] homeassistant NetworkManager[362]: <info>  [1793911970.1139] device (enp0s2): state change: ip-config -> ip-check (reason 'none', managed-type: 'full')
+[  107.169183] homeassistant NetworkManager[362]: <info>  [1793911970.1687] device (enp0s2): state change: ip-check -> secondaries (reason 'none', managed-type: 'full')
+[  107.187563] homeassistant NetworkManager[362]: <info>  [1793911970.1873] device (enp0s2): state change: secondaries -> activated (reason 'none', managed-type: 'full')
+[  107.216998] homeassistant NetworkManager[362]: <info>  [1793911970.2167] manager: NetworkManager state is now CONNECTED_SITE
+[  107.242984] homeassistant NetworkManager[362]: <info>  [1793911970.2427] device (enp0s2): Activation: successful, device activated.
+[  107.251698] homeassistant NetworkManager[362]: <info>  [1793911970.2514] manager: startup complete
+[  107.267513] homeassistant haos-config[414]: [Warning] No config partition found
+[  107.327645] homeassistant systemd[1]: haos-config.service: Deactivated successfully.
+[  107.351485] homeassistant systemd[1]: Finished HAOS Configuration Manager.
+[  107.406004] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=haos-config comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  107.409003] homeassistant audit[1]: SERVICE_STOP pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=haos-config comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  107.552378] homeassistant systemd[1]: Finished Network Manager Wait Online.
+[  107.567001] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=NetworkManager-wait-online comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  107.586626] homeassistant systemd[1]: Reached target Network is Online.
+[  107.657880] homeassistant systemd[1]: Starting Notify NFS peers of a restart...
+[  107.801315] homeassistant systemd[1]: Starting Wait Until Kernel Time Synchronized...
+[  107.858003] homeassistant audit: BPF prog-id=15 op=LOAD
+[  107.893157] homeassistant systemd[1]: Starting Network Time Synchronization...
+[  107.900834] homeassistant NetworkManager[362]: <info>  [1793911970.9005] policy: set 'Wired connection 1' (enp0s2) as default for IPv6 routing and DNS
+[  108.007276] homeassistant systemd-time-wait-sync[439]: Failed to add a watch for /run/systemd/timesync: No such file or directory
+[  108.015984] homeassistant systemd-time-wait-sync[439]: adjtime state 5 status 40 time Thu 2026-11-05 20:52:51.006403 UTC
+[  108.022209] homeassistant sm-notify[438]: Version 2.8.7 starting
+[  108.042773] homeassistant systemd[1]: Started Notify NFS peers of a restart.
+[  108.052003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=rpc-statd-notify comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  108.761526] homeassistant containerd[420]: time="2026-11-05T20:52:51Z" level=warning msg="Configuration migrated from version 2, use `containerd config migrate` to avoid migration" t=1.336319ms
+[  108.768454] homeassistant containerd[420]: containerd: mkdir /mnt/data/docker: read-only file system
+[  108.783064] homeassistant systemd[1]: Started Network Time Synchronization.
+[  108.788003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-timesyncd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  108.794210] homeassistant systemd[1]: containerd.service: Main process exited, code=exited, status=1/FAILURE
+[  108.794486] homeassistant systemd[1]: containerd.service: Failed with result 'exit-code'.
+[  108.797932] homeassistant systemd[1]: Failed to start containerd container runtime.
+[  108.801003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=containerd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=failed'
+[  108.803647] homeassistant systemd[1]: containerd.service: Consumed 1.425s CPU time, 38.7M memory peak.
+[  108.817109] homeassistant systemd[1]: Reached target Multi-User System.
+[  108.819394] homeassistant systemd[1]: Reached target System Time Set.
+[  113.199509] homeassistant login[429]: pam_unix(login:auth): user [root] has blank password; authenticated without it
+[  113.201001] homeassistant audit[429]: USER_AUTH pid=429 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='op=PAM:authentication grantors=pam_unix acct="root" exe="/usr/bin/login" hostname=homeassistant addr=? terminal=/dev/ttyS0 res=success'
+[  113.248004] homeassistant audit[429]: USER_ACCT pid=429 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='op=PAM:accounting grantors=pam_unix acct="root" exe="/usr/bin/login" hostname=homeassistant addr=? terminal=/dev/ttyS0 res=success'
+[  113.251003] homeassistant audit[429]: CRED_ACQ pid=429 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='op=PAM:setcred grantors=pam_unix acct="root" exe="/usr/bin/login" hostname=homeassistant addr=? terminal=/dev/ttyS0 res=success'
+[  113.264368] homeassistant login[429]: pam_unix(login:session): session opened for user root(uid=0) by (uid=0)
+[  113.260001] homeassistant audit[429]: USER_START pid=429 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='op=PAM:session_open grantors=pam_limits,pam_env,pam_unix acct="root" exe="/usr/bin/login" hostname=homeassistant addr=? terminal=/dev/ttyS0 res=success'
+[  113.265000] homeassistant audit[429]: CRED_REFR pid=429 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='op=PAM:setcred grantors=pam_unix acct="root" exe="/usr/bin/login" hostname=homeassistant addr=? terminal=/dev/ttyS0 res=success'
+[  113.265002] homeassistant audit[429]: USER_LOGIN pid=429 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='op=login id=0 exe="/usr/bin/login" hostname=homeassistant addr=? terminal=ttyS0 res=success'
+[  113.317761] homeassistant login[429]: DIALUP AT ttyS0 BY root
+[  113.317893] homeassistant login[429]: ROOT LOGIN ON ttyS0
+[  113.903881] homeassistant systemd[1]: containerd.service: Scheduled restart job, restart counter is at 1.
+[  113.925942] homeassistant systemd[1]: Starting containerd container runtime...
+[  114.477380] homeassistant containerd[472]: time="2026-11-05T20:52:57Z" level=warning msg="Configuration migrated from version 2, use `containerd config migrate` to avoid migration" t="113.792µs"
+[  114.484624] homeassistant containerd[472]: containerd: mkdir /mnt/data/docker: read-only file system
+[  114.495809] homeassistant systemd[1]: containerd.service: Main process exited, code=exited, status=1/FAILURE
+[  114.495962] homeassistant systemd[1]: containerd.service: Failed with result 'exit-code'.
+[  114.499770] homeassistant systemd[1]: Failed to start containerd container runtime.
+[  114.501003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=containerd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=failed'
+[  117.963566] homeassistant systemd[1]: NetworkManager-dispatcher.service: Deactivated successfully.
+[  117.967001] homeassistant audit[1]: SERVICE_STOP pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=NetworkManager-dispatcher comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  117.968697] homeassistant systemd[1]: NetworkManager-dispatcher.service: Consumed 1.353s CPU time, 5.3M memory peak.
+[  119.650550] homeassistant systemd[1]: containerd.service: Scheduled restart job, restart counter is at 2.
+[  119.670231] homeassistant systemd[1]: Starting containerd container runtime...
+[  120.192363] homeassistant containerd[483]: time="2026-11-05T20:53:03Z" level=warning msg="Configuration migrated from version 2, use `containerd config migrate` to avoid migration" t="74.023µs"
+[  120.198853] homeassistant containerd[483]: containerd: mkdir /mnt/data/docker: read-only file system
+[  120.210827] homeassistant systemd[1]: containerd.service: Main process exited, code=exited, status=1/FAILURE
+[  120.210995] homeassistant systemd[1]: containerd.service: Failed with result 'exit-code'.
+[  120.219368] homeassistant systemd[1]: Failed to start containerd container runtime.
+[  120.222002] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=containerd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=failed'
+[  122.647278] homeassistant systemd[1]: systemd-time-wait-sync.service: start operation timed out. Terminating.
+[  122.652601] homeassistant systemd-time-wait-sync[439]: Exit without adjtimex synchronized.
+[  122.674807] homeassistant systemd[1]: systemd-time-wait-sync.service: Failed with result 'timeout'.
+[  122.679248] homeassistant systemd[1]: Failed to start Wait Until Kernel Time Synchronized.
+[  122.680004] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-time-wait-sync comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=failed'
+[  122.688543] homeassistant systemd[1]: Reached target System Time Synchronized.
+[  122.699842] homeassistant systemd[1]: Started Discard unused filesystem blocks once a week.
+[  122.704009] homeassistant systemd[1]: Remove Bluetooth cache entries was skipped because of an unmet condition check (ConditionPathExistsGlob=/var/lib/bluetooth/*/cache).
+[  122.706622] homeassistant systemd[1]: Reached target Timer Units.
+[  125.400484] homeassistant systemd[1]: containerd.service: Scheduled restart job, restart counter is at 3.
+[  125.419836] homeassistant systemd[1]: Starting containerd container runtime...
+[  125.892187] homeassistant containerd[495]: time="2026-11-05T20:53:08Z" level=warning msg="Configuration migrated from version 2, use `containerd config migrate` to avoid migration" t="83.214µs"
+[  125.897584] homeassistant containerd[495]: containerd: mkdir /mnt/data/docker: read-only file system
+[  125.907949] homeassistant systemd[1]: containerd.service: Main process exited, code=exited, status=1/FAILURE
+[  125.908120] homeassistant systemd[1]: containerd.service: Failed with result 'exit-code'.
+[  125.913409] homeassistant systemd[1]: Failed to start containerd container runtime.
+[  125.915000] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=containerd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=failed'
+[  131.150352] homeassistant systemd[1]: containerd.service: Scheduled restart job, restart counter is at 4.
+[  131.171920] homeassistant systemd[1]: Starting containerd container runtime...
+[  131.607936] homeassistant containerd[505]: time="2026-11-05T20:53:14Z" level=warning msg="Configuration migrated from version 2, use `containerd config migrate` to avoid migration" t="80.313µs"
+[  131.612357] homeassistant containerd[505]: containerd: mkdir /mnt/data/docker: read-only file system
+[  131.625854] homeassistant systemd[1]: containerd.service: Main process exited, code=exited, status=1/FAILURE
+[  131.626011] homeassistant systemd[1]: containerd.service: Failed with result 'exit-code'.
+[  131.631289] homeassistant systemd[1]: Failed to start containerd container runtime.
+[  131.633003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=containerd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=failed'
+[  135.526749] homeassistant systemd[1]: systemd-hostnamed.service: Deactivated successfully.
+[  135.530000] homeassistant audit[1]: SERVICE_STOP pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=systemd-hostnamed comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  135.530948] homeassistant systemd[1]: systemd-hostnamed.service: Consumed 1.027s CPU time, 2.2M memory peak.
+[  135.594004] homeassistant audit: BPF prog-id=12 op=UNLOAD
+[  136.650629] homeassistant systemd[1]: containerd.service: Scheduled restart job, restart counter is at 5.
+[  136.671345] homeassistant systemd[1]: Starting containerd container runtime...
+[  137.162846] homeassistant containerd[518]: time="2026-11-05T20:53:20Z" level=warning msg="Configuration migrated from version 2, use `containerd config migrate` to avoid migration" t="69.336µs"
+[  137.167772] homeassistant containerd[518]: containerd: mkdir /mnt/data/docker: read-only file system
+[  137.180698] homeassistant systemd[1]: containerd.service: Main process exited, code=exited, status=1/FAILURE
+[  137.180855] homeassistant systemd[1]: containerd.service: Failed with result 'exit-code'.
+[  137.186035] homeassistant systemd[1]: Failed to start containerd container runtime.
+[  137.187003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=containerd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=failed'
+[  142.413993] homeassistant systemd[1]: containerd.service: Scheduled restart job, restart counter is at 6.
+[  142.440614] homeassistant systemd[1]: Starting containerd container runtime...
+[  142.930708] homeassistant containerd[530]: time="2026-11-05T20:53:25Z" level=warning msg="Configuration migrated from version 2, use `containerd config migrate` to avoid migration" t="69.523µs"
+[  142.935212] homeassistant containerd[530]: containerd: mkdir /mnt/data/docker: read-only file system
+[  142.946827] homeassistant systemd[1]: containerd.service: Main process exited, code=exited, status=1/FAILURE
+[  142.946996] homeassistant systemd[1]: containerd.service: Failed with result 'exit-code'.
+[  142.952862] homeassistant systemd[1]: Failed to start containerd container runtime.
+[  142.954003] homeassistant audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=unconfined msg='unit=containerd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=failed'

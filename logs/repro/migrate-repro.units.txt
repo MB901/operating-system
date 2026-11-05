@@ -1,0 +1,10 @@
+$ journalctl -b --no-pager -o short-monotonic -u haos-data-unlock -u haos-wipe -u haos-expand -u mnt-data.mount
+[   25.355043] homeassistant systemd[1]: Home Assistant OS Device Wipe Service was skipped because of an unmet condition check (ConditionKernelCommandLine=haos.wipe=1).
+[   44.940073] homeassistant systemd[1]: Starting HAOS data partition unlock (network key)...
+[   45.866769] homeassistant haos-data-unlock[415]: [INFO] Key provider: https
+[   46.287581] homeassistant haos-data-unlock[428]: curl: (7) Failed to connect to 10.0.2.2:8444 after 13 ms: Error
+[   46.303190] homeassistant haos-data-unlock[415]: [WARN] Cannot get the https key for the conversion, retrying in 5s
+[   51.512514] homeassistant haos-data-unlock[432]: curl: (7) Failed to connect to 10.0.2.2:8444 after 13 ms: Error
+[   51.529688] homeassistant haos-data-unlock[415]: [WARN] Cannot get the https key for the conversion, retrying in 10s
+[   61.763311] homeassistant haos-data-unlock[436]: curl: (7) Failed to connect to 10.0.2.2:8444 after 22 ms: Error
+[   61.779467] homeassistant haos-data-unlock[415]: [WARN] Cannot get the https key for the conversion, retrying in 20s

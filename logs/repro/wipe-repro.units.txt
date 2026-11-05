@@ -1,0 +1,10 @@
+$ journalctl -b --no-pager -o short-monotonic -u haos-data-unlock -u haos-wipe -u haos-expand -u mnt-data.mount
+[   21.811678] homeassistant systemd[1]: Starting Home Assistant OS Device Wipe Service...
+[   22.560686] homeassistant haos-wipe[229]: [ERROR] Data partition not found
+[   22.599277] homeassistant systemd[1]: haos-wipe.service: Main process exited, code=exited, status=1/FAILURE
+[   22.603349] homeassistant systemd[1]: haos-wipe.service: Failed with result 'exit-code'.
+[   22.608746] homeassistant systemd[1]: Failed to start Home Assistant OS Device Wipe Service.
+[   99.410305] homeassistant systemd[1]: Dependency failed for HAOS data partition.
+[   99.442918] homeassistant systemd[1]: mnt-data.mount: Job mnt-data.mount/start failed with result 'dependency'.
+[   99.443069] homeassistant systemd[1]: Dependency failed for HAOS data resizing.
+[   99.447157] homeassistant systemd[1]: haos-expand.service: Job haos-expand.service/start failed with result 'dependency'.
