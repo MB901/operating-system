@@ -26,7 +26,7 @@ All runs happened in QEMU VMs (TCG, no KVM, 4 vCPU, 2 GiB RAM, OVMF) on a cloud 
 | 10 | Supervisor data disk view | **mismatch confirmed**: udisks2 `Device` = `/dev/dm-0`, os-agent `CurrentDevice` = `/dev/mapper/hassos-data`. Supervisor compares these, so a false "multiple data disks" issue is expected; it could not be read back because Supervisor stays in `setup` without Internet |
 | 11 | Plain installation → in-place LUKS2 by HAOS (`migrate`) | MIGRATE_PLACEHOLDER |
 | 12 | `haos.wipe=1` on an encrypted system | WIPE_PLACEHOLDER |
-| 13 | Release 18.4 untouched vs prototype rootfs without the flag | COMPARE_PLACEHOLDER |
+| 13 | Release 18.4 untouched vs prototype rootfs without the flag | **pass**: same set of active units (apart from random per-container overlay mounts) and the same failed unit on both: `systemd-time-wait-sync`, because the VM has no NTP, so it also fails on the untouched release. Same milestone order: `mnt-overlay` → `mnt-data` → `sysinit` → `basic` → `network-online` → `docker` → `haos-supervisor` → `multi-user`. Only parallel bind mounts swap places between runs. Timestamps (s, monotonic): release 12.4 / 22.8 / 35.9 / 36.0 / 41.2 / 76.8 / 77.8 / 77.9; prototype rootfs 16.3 / 28.1 / 40.5 / 40.6 / 46.6 / 83.1 / 85.1 / 85.2, slower because of the all-lzma rootfs. `systemd-analyze` is not in the HAOS image, so these come from `ActiveEnterTimestampMonotonic` and the journal |
 | 14 | `haos-expand` on the encrypted partition | EXPAND_PLACEHOLDER |
 | 15 | Plaintext on the encrypted data partition | **pass** for the harness-converted image: 52 lines matching `hassio_supervisor\|containerd` in the original ext4, 0 in the LUKS2 partition |
 
@@ -44,4 +44,85 @@ The test rootfs also needed, for test purposes only:
 
 ## Details
 
-RESULTS_DETAILS_PLACEHOLDER
+### Ordering cycles without the generator overrides (first boot of the first version)
+
+```
+systemd[1]: sysinit.target: Found ordering cycle on systemd-resolved.service/start
+systemd[1]: sysinit.target: Found dependency on systemd-tmpfiles-setup.service/start
+systemd[1]: sysinit.target: Found dependency on systemd-journal-flush.service/start
+systemd[1]: sysinit.target: Found dependency on var-log-journal.mount/start
+systemd[1]: sysinit.target: Found dependency on mnt-data.mount/start
+systemd[1]: sysinit.target: Found dependency on haos-data-unlock.service/start
+systemd[1]: sysinit.target: Found dependency on network-online.target/start
+...
+systemd[1]: sysinit.target: Job systemd-resolved.service/start deleted to break ordering cycle
+systemd[1]: sysinit.target: Job auditd.service/start deleted to break ordering cycle
+systemd[1]: mnt-data.mount: Job haos-data-unlock.service/start deleted to break ordering cycle
+```
+
+### key-ok (HTTPS)
+
+```
+[   21.5] Starting HAOS data partition unlock (network key)...
+[   22.9] haos-data-unlock[444]: [INFO] Data partition unlocked (attempt 1)
+$ systemctl is-active haos-data-unlock mnt-data.mount var-lib-docker.mount containerd docker haos-supervisor
+active (all)
+$ findmnt /mnt/data; findmnt /var/log/journal
+/mnt/data         /dev/mapper/hassos-data          ext4 rw,relatime,commit=30
+/var/log/journal  /dev/mapper/hassos-data[/logs]   ext4
+$ cryptsetup status hassos-data
+  type: LUKS2  cipher: aes-xts-plain64  keysize: 512 bits  key location: keyring  device: /dev/vda8
+$ journalctl -b | grep -i 'ordering cycle'
+none
+```
+
+### locked-reboots (key server down, power cut about 30 s after the prompt, 3 times)
+
+```
+locked boot 1: slot A, rescue entry: no,  prompt shown; grubenv: A_OK=1 A_TRY=1 B_OK=0
+locked boot 2: slot A, rescue entry: no,  prompt shown; grubenv: A_OK=1 A_TRY=2 B_OK=0
+locked boot 3: slot A, rescue entry: no,  prompt shown; grubenv: A_OK=1 A_TRY=3 B_OK=0
+boot 4 (key server up): GRUB "Slot A (rescue shell)" -> systemd.unit=recovery.target
+  "You are in rescue mode ... Press Enter for maintenance (or press Control-D to continue)"
+  no console login within 900 s
+```
+
+### Console while locked
+
+Before the fix:
+
+```
+systemd-tty-ask-password-agent: Starting password query on /dev/ttyS0.
+systemd[1]: Stopping Dispatch Password Requests to Console...
+```
+
+The cause is `systemd-ask-password-wall.service`: `ExecStartPre=-systemctl stop systemd-ask-password-console.path …`.
+
+After the fix (wall agent ordered `After=haos-data-unlock.service`):
+
+```
+Data partition is waiting for its network key. Recovery passphrase: (press TAB for no echo)
+```
+
+### Tang
+
+```
+1. reachable:            [INFO] Key provider: tang / Data partition unlocked with the tang key (attempt 1)
+2. down 3 min:           Error communicating with server http://10.0.2.2:8888 ... attempt 6 failed
+                         [INFO] Data partition unlocked with the tang key (attempt 7)
+3. other keys:           tangd: POST /rec/_sW6pE8F... => 404; data stays locked
+4. rotated keys:         tangd-rotate-keys keeps .<old>.jwk; POST /rec/_sW6pE8F... => 200, unlocked (attempt 1)
+```
+
+### udisks2 / os-agent view of the data device
+
+```
+$ busctl get-property org.freedesktop.UDisks2 /org/freedesktop/UDisks2/block_devices/dm_2d0 org.freedesktop.UDisks2.Block Device
+ay 10 47 100 101 118 47 100 109 45 48 0      # "/dev/dm-0"
+$ busctl get-property io.hass.os /io/hass/os/DataDisk io.hass.os.DataDisk CurrentDevice
+s "/dev/mapper/hassos-data"
+$ ha resolution info
+{"result":"error","message":"System is not ready with state: setup"}   # no Internet in the VM
+```
+
+MORE_DETAILS_PLACEHOLDER
