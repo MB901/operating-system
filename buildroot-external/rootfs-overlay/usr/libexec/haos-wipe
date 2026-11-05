@@ -8,6 +8,8 @@ PARTITION_DATA="/dev/disk/by-label/hassos-data"
 # before unlock. The wipe also erases the unlock configuration (overlay), so
 # destroy the LUKS2 keyslots and header and go back to a plain partition.
 CRYPT_PARTITION="/dev/disk/by-partlabel/hassos-data"
+# This runs very early: make sure udev has created the by-partlabel links.
+udevadm settle || true
 if [ "$(blkid -s TYPE -o value "$CRYPT_PARTITION" 2> /dev/null)" = "crypto_LUKS" ]; then
     PARTITION_DATA="$CRYPT_PARTITION"
     echo "[INFO] Erasing LUKS2 keyslots and header of the data partition"
