@@ -14,16 +14,19 @@ import time
 
 
 class VM:
-    def __init__(self, base_image: str, workdir: str, name: str, mem: str = "2048", smp: str = "4"):
+    def __init__(self, base_image: str, workdir: str, name: str, mem: str = "2048", smp: str = "4",
+                 disk_name: str | None = None):
         self.workdir = workdir
         self.name = name
-        self.disk = os.path.join(workdir, f"{name}.qcow2")
+        # reuse an existing overlay (several boots of the same "machine")
+        self.disk = os.path.join(workdir, f"{disk_name or name}.qcow2")
         self.sock = os.path.join(workdir, f"{name}.serial")
         self.log_path = os.path.join(workdir, f"{name}.serial.log")
         self.buf = ""
         self.pos = 0
-        subprocess.run(["qemu-img", "create", "-q", "-f", "qcow2", "-b", os.path.abspath(base_image),
-                        "-F", "raw", self.disk], check=True)
+        if not os.path.exists(self.disk):
+            subprocess.run(["qemu-img", "create", "-q", "-f", "qcow2", "-b", os.path.abspath(base_image),
+                            "-F", "raw", self.disk], check=True)
         if os.path.exists(self.sock):
             os.unlink(self.sock)
         self.proc = subprocess.Popen([
@@ -69,6 +72,18 @@ class VM:
             self._read()
         raise TimeoutError(f"{self.name}: '{pattern}' not seen within {timeout}s")
 
+    def expect_opt(self, pattern: str, timeout: float) -> re.Match | None:
+        try:
+            return self.expect(pattern, timeout)
+        except TimeoutError:
+            return None
+
+    def seen(self, pattern: str, timeout: float) -> bool:
+        """True if pattern appears (anywhere in the log so far, or within timeout)."""
+        if re.search(pattern, self.buf):
+            return True
+        return self.expect_opt(pattern, timeout) is not None
+
     def send(self, line: str) -> None:
         self.s.sendall(line.encode() + b"\n")
 
@@ -99,6 +114,12 @@ class VM:
             time.sleep(interval)
         return False
 
+    def power_cut(self) -> None:
+        """Simulate a power cut: kill QEMU without shutting the guest down."""
+        self.proc.kill()
+        self.proc.wait()
+        self.log.close()
+
     def stop(self) -> None:
         try:
             self.send("poweroff")
@@ -106,3 +127,13 @@ class VM:
         except Exception:
             self.proc.kill()
         self.log.close()
+
+
+def read_grubenv(disk: str, workdir: str) -> str:
+    """Read EFI/BOOT/grubenv from the boot partition of a (stopped) VM disk."""
+    boot = os.path.join(workdir, "boot.vfat")
+    subprocess.run(["qemu-img", "dd", "-f", "qcow2", "-O", "raw", "bs=512", "skip=2048", "count=65536",
+                    f"if={disk}", f"of={boot}"], check=True)
+    out = subprocess.run(["mtype", "-i", boot, "::EFI/BOOT/grubenv"], capture_output=True, text=True).stdout
+    os.unlink(boot)
+    return " ".join(line for line in out.splitlines() if line and not line.startswith("#"))

@@ -16,3 +16,6 @@ ExecStart=/usr/bin/journalctl --relinquish-var
 ExecStart=/bin/mkdir -p /mnt/data/logs /var/log/journal
 ExecStart=/bin/mount --bind /mnt/data/logs /var/log/journal
 ExecStart=/usr/bin/journalctl --flush
+# Release the data partition at shutdown so it can be unmounted and closed
+ExecStop=-/usr/bin/journalctl --relinquish-var
+ExecStop=-/bin/umount /var/log/journal

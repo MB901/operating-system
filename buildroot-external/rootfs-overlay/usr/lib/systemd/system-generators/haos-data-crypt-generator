@@ -120,3 +120,14 @@ EOF
 mkdir -p "${EARLY_DIR}/multi-user.target.wants"
 ln -sf /usr/lib/systemd/system/haos-data-crypt-post.service \
     "${EARLY_DIR}/multi-user.target.wants/haos-data-crypt-post.service"
+
+# Not supported yet with an encrypted data partition, disabled to stay safe:
+# - haos-data.service (move data disk) would copy the *decrypted* filesystem
+#   to an unencrypted external disk with e2image;
+# - haos-data-disk-detach.service cannot find the disk of a dm-crypt device
+#   and would relabel the internal data filesystem as disabled;
+# - haos-wipe.service looks for the label before unlock and would recreate
+#   a plain ext4 while the unlock configuration still expects LUKS2.
+for unit in haos-data.service haos-data-disk-detach.service haos-wipe.service; do
+    ln -sf /dev/null "${EARLY_DIR}/${unit}"
+done

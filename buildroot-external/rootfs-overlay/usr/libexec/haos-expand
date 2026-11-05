@@ -11,9 +11,14 @@ DEVICE_CHILD="$(findfs LABEL="hassos-data")"
 CRYPT_NAME=""
 if [ "$(lsblk -dno TYPE "${DEVICE_CHILD}")" = "crypt" ]; then
     CRYPT_NAME="hassos-data"
-    # lsblk does not report PKNAME for dm devices, use sysfs
-    DM_NAME="$(basename "$(readlink -f "${DEVICE_CHILD}")")"
-    set -- "/sys/class/block/${DM_NAME}/slaves/"*
+    # lsblk does not report PKNAME for dm devices and /dev/mapper/* may be
+    # a device node rather than a symlink: find the parent through sysfs.
+    MAJ_MIN="$(lsblk -dno MAJ:MIN "${DEVICE_CHILD}" | tr -d ' ')"
+    set -- "/sys/dev/block/${MAJ_MIN}/slaves/"*
+    if [ ! -e "$1" ]; then
+        echo "[ERROR] Cannot find the partition below ${DEVICE_CHILD}"
+        exit 1
+    fi
     DEVICE_CHILD="/dev/$(basename "$1")"
     echo "[INFO] Data partition is encrypted, parent partition ${DEVICE_CHILD}"
 fi

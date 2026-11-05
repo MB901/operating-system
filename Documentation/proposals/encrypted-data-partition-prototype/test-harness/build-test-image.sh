@@ -11,6 +11,11 @@
 # Test-only. Never run against a disk or an image used in production.
 #
 # Usage: build-test-image.sh <release.img> <modules-dir> <keys-dir> <out.img> [disk-size]
+# Environment:
+#   WITH_CLEVIS=1        copy clevis + jose (from this Ubuntu host) into the rootfs
+#   KEY_JWE=<file>       put <file> on the overlay as key.jwe (Tang provider)
+#                        instead of the HTTPS configuration
+#   SYSTEM0_IMAGE=<file> reuse an already built rootfs image (skips step 2)
 #   modules-dir: contains dm-crypt.ko xts.ko essiv.ko for the release kernel
 #   keys-dir:    output of key-server.py --init (net.key, ca.pem, token, url)
 # Requires: root, sgdisk, erofs-utils, cryptsetup, mtools, e2fsprogs, kmod,
@@ -42,28 +47,51 @@ cp --sparse=always "${SRC_IMG}" "${OUT_IMG}"
 P_BOOT=1 P_SYSTEM0=3 P_OVERLAY=7 P_DATA=8
 
 echo "[2/6] Rebuild rootfs (system0) with modules and prototype files"
-extract "${P_SYSTEM0}" "${WORK}/system0.erofs"
-mkdir "${WORK}/rootfs"
-fsck.erofs --extract="${WORK}/rootfs" "${WORK}/system0.erofs" > /dev/null
-KVER="$(ls "${WORK}/rootfs/lib/modules")"
-install -D -m 0644 -t "${WORK}/rootfs/lib/modules/${KVER}/updates" "${MOD_DIR}"/*.ko
-depmod -b "${WORK}/rootfs" "${KVER}"
-for f in \
-    usr/lib/systemd/system-generators/haos-data-crypt-generator \
-    usr/lib/systemd/system/haos-data-unlock.service \
-    usr/lib/systemd/system/haos-data-crypt-post.service \
-    usr/libexec/haos-data-unlock \
-    usr/libexec/haos-expand; do
-    install -D -m "$(stat -c %a "${OVERLAY_SRC}/${f}")" "${OVERLAY_SRC}/${f}" "${WORK}/rootfs/${f}"
-done
-# The release uses lz4hc+lzma with compress hints (BR2_TARGET_ROOTFS_EROFS_*).
-# With the erofs-utils 1.7 of the build host that does not fit in 256 MiB,
-# so use lzma for everything (slower boot, fine for a test VM).
-mkfs.erofs -zlzma,9 -Eztailpacking,fragments,dedupe -C262144 \
-    "${WORK}/system0.new" "${WORK}/rootfs" > /dev/null
-if [ "$(stat -c %s "${WORK}/system0.new")" -gt "$(( $(part_size ${P_SYSTEM0}) * 512 ))" ]; then
-    echo "rootfs does not fit in the system partition" >&2
-    exit 1
+if [ -n "${SYSTEM0_IMAGE:-}" ]; then
+    echo "    reusing ${SYSTEM0_IMAGE}"
+    cp "${SYSTEM0_IMAGE}" "${WORK}/system0.new"
+else
+    extract "${P_SYSTEM0}" "${WORK}/system0.erofs"
+    mkdir "${WORK}/rootfs"
+    fsck.erofs --extract="${WORK}/rootfs" "${WORK}/system0.erofs" > /dev/null
+    KVER="$(ls "${WORK}/rootfs/lib/modules")"
+    install -D -m 0644 -t "${WORK}/rootfs/lib/modules/${KVER}/updates" "${MOD_DIR}"/*.ko
+    depmod -b "${WORK}/rootfs" "${KVER}"
+    for f in \
+        usr/lib/systemd/system-generators/haos-data-crypt-generator \
+        usr/lib/systemd/system/haos-data-unlock.service \
+        usr/lib/systemd/system/haos-data-crypt-post.service \
+        usr/libexec/haos-data-unlock \
+        usr/libexec/haos-expand; do
+        install -D -m "$(stat -c %a "${OVERLAY_SRC}/${f}")" "${OVERLAY_SRC}/${f}" "${WORK}/rootfs/${f}"
+    done
+    # The release uses lz4hc+lzma with compress hints (BR2_TARGET_ROOTFS_EROFS_*).
+    # With the erofs-utils 1.7 of the build host that does not fit in 256 MiB,
+    # so use lzma for everything (slower boot, fine for a test VM).
+    if [ "${WITH_CLEVIS:-0}" = "1" ]; then
+        # Test-only: Ubuntu 24.04 binaries (glibc 2.39) run on HAOS (glibc 2.41).
+        # A real image would build the Buildroot jose package and a clevis one.
+        CLEVIS_FILES="/usr/bin/clevis /usr/bin/clevis-decrypt /usr/bin/clevis-decrypt-tang
+            /usr/bin/clevis-decrypt-sss /usr/bin/jose
+            /usr/lib/x86_64-linux-gnu/libjose.so.0 /usr/lib/x86_64-linux-gnu/libjansson.so.4"
+        # shellcheck disable=SC2086
+        for f in ${CLEVIS_FILES}; do
+            case "${f}" in
+                *.so.*) install -D -m 0755 "$(readlink -f "${f}")" "${WORK}/rootfs/usr/lib/$(basename "${f}")" ;;
+                *) install -D -m 0755 "${f}" "${WORK}/rootfs${f}" ;;
+            esac
+        done
+        # shellcheck disable=SC2086,SC2046
+        echo "    clevis+jose files: $(du -cb $(for f in ${CLEVIS_FILES}; do readlink -f "${f}"; done) | tail -n 1 | cut -f1) bytes uncompressed"
+    fi
+    mkfs.erofs -zlzma,9 -Eztailpacking,fragments,dedupe -C262144 \
+        "${WORK}/system0.new" "${WORK}/rootfs" > /dev/null
+    if [ "$(stat -c %s "${WORK}/system0.new")" -gt "$(( $(part_size ${P_SYSTEM0}) * 512 ))" ]; then
+        echo "rootfs does not fit in the system partition" >&2
+        exit 1
+    fi
+    cp "${WORK}/system0.new" "${OUT_IMG%.img}.system0.erofs"
+    echo "    rootfs image: $(stat -c %s "${WORK}/system0.new") bytes (saved as ${OUT_IMG%.img}.system0.erofs)"
 fi
 inject "${P_SYSTEM0}" "${WORK}/system0.new"
 
@@ -104,7 +132,16 @@ inject "${P_DATA}" "${WORK}/data.luks"
 
 echo "[4/6] Unlock configuration on overlay"
 extract "${P_OVERLAY}" "${WORK}/overlay.ext4"
-cat > "${WORK}/debugfs.cmd" <<EOF
+if [ -n "${KEY_JWE:-}" ]; then
+    cat > "${WORK}/debugfs.cmd" <<EOF
+mkdir etc
+mkdir etc/haos-data-crypt
+write $(realpath "${KEY_JWE}") etc/haos-data-crypt/key.jwe
+sif etc/haos-data-crypt mode 040700
+sif etc/haos-data-crypt/key.jwe mode 0100600
+EOF
+else
+    cat > "${WORK}/debugfs.cmd" <<EOF
 mkdir etc
 mkdir etc/haos-data-crypt
 write ${KEYS_DIR}/url etc/haos-data-crypt/key-url
@@ -115,6 +152,7 @@ sif etc/haos-data-crypt/token mode 0100600
 sif etc/haos-data-crypt/key-url mode 0100644
 sif etc/haos-data-crypt/ca.pem mode 0100644
 EOF
+fi
 debugfs -w -f "${WORK}/debugfs.cmd" "${WORK}/overlay.ext4" > /dev/null 2>&1
 inject "${P_OVERLAY}" "${WORK}/overlay.ext4"
 
