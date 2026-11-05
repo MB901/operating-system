@@ -59,3 +59,7 @@ Device requires reencryption recovery. Run repair first.
 - `runs-mig10` (plain10 image): **`migrate` passed**, with a power cut 40 s into the conversion. Boot 3 logs "Repairing the interrupted reencryption" and "Conversion finished in 388s", and all post-conversion checks are in `migrate-boot3.serial.log`. The harness process died on a full disk during the final scan, so there is no `results.md`. The scan was redone by hand: 0 canary lines left in the partition. The key server of this run could not bind port 8444, because a server left over from a reproduction was serving the same test key.
 - `runs-wipe9` (https9 image, first image that really contains the LUKS-aware `haos-wipe`): **`wipe` passed**. `journalctl-all-boots-from-disk.txt` is the persistent journal read back from the wiped data partition. It includes the wipe boot: `Using /usr/sbin/blkid`, `Data partition type: crypto_LUKS`, `Erasing LUKS2 keyslots and header`.
 - Correction: the earlier `wipe` runs (`runs-b4`, `runs-7`, `repro/wipe-repro`) used the **stock** `haos-wipe`, because the harness did not copy the prototype's version into the test rootfs. Their "Data partition not found" comes from the stock script, not from a udev race.
+
+## Re-runs on the final rootfs (sha256-checked against the branch)
+
+`sha256-check-final-rootfs.md`, then `runs/final-runs-f1` (https10: key-ok, key-denied, wipe, locked-reboots), `runs/final-runs-f2` (tang10: Tang 1-4) and `runs/final-runs-f3` (plain10: T5 compare). `migrate` on the same rootfs is `runs/runs-mig10`.
