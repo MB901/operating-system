@@ -24,10 +24,21 @@ All runs happened in QEMU VMs (TCG, no KVM, 4 vCPU, 2 GiB RAM, OVMF) on a cloud 
 | 8 | Console prompt while waiting | **pass after a fix**: first the console went silent, because `systemd-ask-password-wall.service` stops the console agent. With the wall agent ordered after the unlock, "Data partition is waiting for its network key. Recovery passphrase:" is shown on the console during every locked boot |
 | 9 | Recovery passphrase typed on the console | **pass after a fix**: with the key server answering 403, the prompt appears at 38 s; the passphrase is typed at 98 s, then "[INFO] Data partition unlocked with the recovery passphrase", console login at 136 s, Docker up. First attempt failed: `systemd-ask-password` ends the passphrase with a newline, and `--key-file=-` kept it, so the unlock now reads the passphrase without `--key-file` |
 | 10 | Supervisor data disk view | **mismatch confirmed**: udisks2 `Device` = `/dev/dm-0`, os-agent `CurrentDevice` = `/dev/mapper/hassos-data`. Supervisor compares these, so a false "multiple data disks" issue is expected; it could not be read back because Supervisor stays in `setup` without Internet |
-| 11 | Plain installation → in-place LUKS2 by HAOS (`migrate`) | MIGRATE_PLACEHOLDER |
-| 12 | `haos.wipe=1` on an encrypted system | First run: **failed safely**. `haos-wipe` runs before udev has created `/dev/disk/by-partlabel/hassos-data`, so it did not see LUKS2, stopped with "Data partition not found" and erased nothing, and both flags stayed in `cmdline.txt`. Fix: `udevadm settle` first. WIPE_RETEST |
+| 11 | Plain installation → in-place LUKS2 by HAOS (`migrate`) | **not completed; three bugs found and fixed, data never damaged**. Boot 1 (plain), as planned:
+  - 20 000 canary lines and a 64 MiB random file written in `/mnt/data/supervisor/share`;
+  - an SSH key and a Wi-Fi profile added on the overlay;
+  - a full backup *failed* ("An error occurred while making backup": Supervisor stays in `setup` without Internet), but a partial backup of `share` succeeded (64 MB);
+  - unlock configuration, `convert` marker and `haos.data-crypt=1` added.
+
+  Then the in-place conversion by `haos-data-unlock` failed on three successive runs, each time **before** touching the data (partition still ext4, canary still readable):
+  1. `resize2fs` is not in the image (the test copy from Ubuntu needed its own libraries: `undefined symbol: test_io_manager`);
+  2. after that fix, `resize2fs` shrank the filesystem, then `cryptsetup reencrypt` failed with "Cannot create temporary header file", because it writes it in the current directory, `/` on the read-only erofs (fixed: run from `/run`);
+  3. the last run failed again, and **its cause was not read before the end of the session**: the debug boot of that disk was its fourth boot without a slot marked good, so GRUB sent it to the rescue shell (see scenario 7).
+
+  So **the power cut during conversion, the resume, the timing, the overlay/SSH/network checks after conversion and the backup restore were not tested** |
+| 12 | `haos.wipe=1` on an encrypted system | First run: **failed safely**. `haos-wipe` runs before udev has created `/dev/disk/by-partlabel/hassos-data`, so it did not see LUKS2, stopped with "Data partition not found" and erased nothing, and both flags stayed in `cmdline.txt`. Fix: `udevadm settle` first. The fix was **not re-tested**. |
 | 13 | Release 18.4 untouched vs prototype rootfs without the flag | **pass**: same set of active units (apart from random per-container overlay mounts) and the same failed unit on both: `systemd-time-wait-sync`, because the VM has no NTP, so it also fails on the untouched release. Same milestone order: `mnt-overlay` → `mnt-data` → `sysinit` → `basic` → `network-online` → `docker` → `haos-supervisor` → `multi-user`. Only parallel bind mounts swap places between runs. Timestamps (s, monotonic): release 12.4 / 22.8 / 35.9 / 36.0 / 41.2 / 76.8 / 77.8 / 77.9; prototype rootfs 16.3 / 28.1 / 40.5 / 40.6 / 46.6 / 83.1 / 85.1 / 85.2, slower because of the all-lzma rootfs. `systemd-analyze` is not in the HAOS image, so these come from `ActiveEnterTimestampMonotonic` and the journal |
-| 14 | `haos-expand` on the encrypted partition | **partly**: grows the partition but cannot grow the mapping. After fixing the parent-disk lookup (lsblk gives no `PKNAME` for dm and lists the dm child first, so sysfs is used), the partition grew from 968 MB to 5.3 GB. Then `cryptsetup resize` asked for a key ("Nothing to read on input"): LUKS2 resize needs authorisation even with the volume key in the keyring. Fix in the branch, **not re-tested** (EXPAND_RETEST): grow the LUKS2 partition *before* the unlock (no key needed), so the mapping opens at full size and `systemd-growfs` grows ext4 |
+| 14 | `haos-expand` on the encrypted partition | **partly**: grows the partition but cannot grow the mapping. After fixing the parent-disk lookup (lsblk gives no `PKNAME` for dm and lists the dm child first, so sysfs is used), the partition grew from 968 MB to 5.3 GB. Then `cryptsetup resize` asked for a key ("Nothing to read on input"): LUKS2 resize needs authorisation even with the volume key in the keyring. Fix in the branch, **not re-tested**: grow the LUKS2 partition *before* the unlock (no key needed), so the mapping opens at full size and `systemd-growfs` grows ext4 |
 | 15 | Plaintext on the encrypted data partition | **pass** for the harness-converted image: 52 lines matching `hassio_supervisor\|containerd` in the original ext4, 0 in the LUKS2 partition |
 
 Sizes, measured with **Ubuntu 24.04 binaries** (not a measure of Buildroot packages):
@@ -125,4 +136,6 @@ $ ha resolution info
 {"result":"error","message":"System is not ready with state: setup"}   # no Internet in the VM
 ```
 
-MORE_DETAILS_PLACEHOLDER
+### T5 comparison method
+
+Both images booted with `console=ttyS0` added to `cmdline.txt` (nothing else changed on the release image). Active units: `systemctl list-units --all --state=active,failed`. Order: `journalctl -b -o short-monotonic` lines for "Mounted / Finished / Started / Reached target".
