@@ -81,7 +81,15 @@ else
             /usr/lib/x86_64-linux-gnu/libjose.so.0 /usr/lib/x86_64-linux-gnu/libjansson.so.4"
         # resize2fs is not in the HAOS image (BR2_PACKAGE_E2FSPROGS_RESIZE2FS
         # is not set); the in-place conversion needs it to shrink ext4.
-        install -D -m 0755 /usr/sbin/resize2fs "${WORK}/rootfs/usr/sbin/resize2fs"
+        # Ubuntu's resize2fs needs symbols the HAOS libext2fs does not export
+        # (test_io_manager), so it gets its own Ubuntu e2fsprogs libraries.
+        E2=/usr/lib/haos-test-e2fs
+        install -D -m 0755 /usr/sbin/resize2fs "${WORK}/rootfs${E2}/resize2fs"
+        for lib in libext2fs.so.2 libe2p.so.2 libcom_err.so.2; do
+            install -D -m 0644 "$(readlink -f "/usr/lib/x86_64-linux-gnu/${lib}")" "${WORK}/rootfs${E2}/${lib}"
+        done
+        printf '#!/bin/sh\nLD_LIBRARY_PATH=%s exec %s/resize2fs "$@"\n' "${E2}" "${E2}" > "${WORK}/rootfs/usr/sbin/resize2fs"
+        chmod 0755 "${WORK}/rootfs/usr/sbin/resize2fs"
         # shellcheck disable=SC2086
         for f in ${CLEVIS_FILES}; do
             case "${f}" in

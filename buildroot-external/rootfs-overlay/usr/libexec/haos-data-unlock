@@ -184,13 +184,15 @@ if [ -n "${CONVERT}" ]; then
 fi
 
 # Recovery passphrase prompt on the console, in parallel with the network
-# attempts. Whoever opens the volume first wins.
+# attempts. Whoever opens the volume first wins. No --key-file here:
+# systemd-ask-password ends the passphrase with a newline, and cryptsetup
+# reading a passphrase from a non-tty stdin stops at the newline.
 recovery_prompt() {
     while ! unlocked; do
         systemd-ask-password --timeout=0 --id="haos-data-unlock:${NAME}" \
             "Data partition is waiting for its network key. Recovery passphrase:" \
             | cryptsetup open --type luks2 --key-slot "${RECOVERY_KEY_SLOT}" \
-                --key-file=- "${DEVICE}" "${NAME}" 2> /dev/null \
+                "${DEVICE}" "${NAME}" 2> /dev/null \
             || sleep 2
     done
 }
