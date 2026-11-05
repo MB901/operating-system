@@ -169,10 +169,24 @@ Comparison. **This is a choice for maintainers, not a recommendation.**
 
 ## 9. Migration and the existing data disk features
 
-- **New installs**: create LUKS2 + ext4 at first boot, or with a dedicated "encrypt" action. Provisioning (enrolling the key, showing the recovery passphrase) is **not prototyped**: the test image is converted offline on the build host.
-- **Existing installs**, options:
-  - **A. Backup / restore** into a new LUKS partition. Simplest to explain, needs downtime and a backup that fits.
-  - **B. In-place** `cryptsetup reencrypt --encrypt --reduce-device-size` after shrinking ext4. No extra disk, but long. The release data ext4 is already at its minimum size, so `resize2fs` refused to shrink it in the test build [T]. This path needs free space at the end of the partition.
+- **New installs**: create LUKS2 + ext4 at first boot, or with a dedicated "encrypt" action. Enrolment UX (showing the recovery passphrase, header backup) is not prototyped.
+- **Existing installs: in-place conversion by HAOS itself** (prototyped, `migrate` scenario, see `RESULTS.md`). The user puts the unlock configuration on the overlay, plus a `convert` marker and an optional one-time `recovery-passphrase` file, and adds `haos.data-crypt=1`. On the next boot `haos-data-unlock`:
+  1. gets the key;
+  2. runs `e2fsck`;
+  3. shrinks ext4 by 32 MiB with `resize2fs`;
+  4. runs `cryptsetup reencrypt --encrypt --reduce-device-size 32M`;
+  5. adds keyslot 1, removes the marker and opens the volume.
+
+  The overlay is not touched, and `haos.wipe` is not involved (it would also erase the overlay). An interrupted conversion is resumed with `cryptsetup reencrypt --resume-only`. Findings so far [T]:
+  - `resize2fs` is not in the image, so it must be added (`BR2_PACKAGE_E2FSPROGS_RESIZE2FS`).
+  - `cryptsetup reencrypt` writes a temporary header file in the current directory. With `/` being the read-only erofs it fails ("Cannot create temporary header file"), so the conversion must run from a writable directory (`/run`).
+  - Each time a step failed, the script stopped **before** touching the data. The partition stayed plain ext4 with the test data intact, and the boot continued without `/mnt/data`.
+  - Results of the full run, the power cut in the middle and the timing: see `RESULTS.md` (`migrate`).
+- **Traces that a conversion cannot remove**, to state in user docs:
+  - **SSD and eMMC**: rewriting a sector in place does not erase the old flash pages. The FTL keeps them until garbage collection, and over-provisioned or remapped blocks can hold old plaintext indefinitely. TRIM of free space before converting helps but gives no guarantee. The clean path for sensitive data is to encrypt onto a new or securely erased disk (`nvme sanitize` / `nvme format -s`, ATA secure erase) and then sanitize the old one.
+  - **Old data partitions**: every past "move data disk" leaves a full plaintext copy, the internal partition relabelled `hassos-data-old` or an external partition named `hassos-data-external-old` (`haos-data`, `supervisor/os/const.py`). Those must be wiped separately.
+  - Backups already copied elsewhere (network storage, cloud) are outside this scheme.
+- **Option B (backup / restore into a new LUKS partition)** remains the simplest to explain, and the only one that avoids in-place rewriting on the same flash.
 - **Data disk move** (`haos-data`, `e2image -ra`) would copy the **decrypted** filesystem to an unencrypted external disk, then relabel. Disabled by the prototype. It needs a LUKS-aware path in OS, os-agent and Supervisor.
 - **Disk detach** (`haos-data-disk-detach`) cannot find the disk of a dm device and would relabel the internal data filesystem as disabled. Disabled by the prototype.
 - **Wipe** (`haos.wipe=1`) looks for the label before unlock. Disabled by the prototype. It needs to decide whether to recreate LUKS2 or go back to plain ext4.
