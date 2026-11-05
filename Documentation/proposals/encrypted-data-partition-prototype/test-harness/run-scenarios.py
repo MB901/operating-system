@@ -280,16 +280,35 @@ CANARY = "PLAINTEXT-CANARY-5e1b7c"
 DATA_PART_START = 1427456  # sector of hassos-data in the generic-x86-64 layout
 
 
+def _data_partition_raw(disk: str, workdir: str) -> str:
+    """Extract the data partition of a stopped VM disk to a raw file."""
+    full = os.path.join(workdir, "disk-full.raw")
+    part = os.path.join(workdir, "data-part.raw")
+    subprocess.run(["qemu-img", "convert", "-U", "-O", "raw", disk, full], check=True)
+    subprocess.run(["dd", f"if={full}", f"of={part}", "bs=512", f"skip={DATA_PART_START}", "status=none"], check=True)
+    os.unlink(full)
+    return part
+
+
 def scan_data_partition(disk: str, workdir: str, pattern: str) -> int:
     """Count lines containing pattern in the data partition of a stopped VM disk."""
-    raw = os.path.join(workdir, "data-part.raw")
-    size = int(subprocess.run(["qemu-img", "info", "-U", "--output=json", disk], capture_output=True,
-                              text=True, check=True).stdout.split('"virtual-size": ')[1].split(",")[0])
-    subprocess.run(["qemu-img", "dd", "-U", "-f", "qcow2", "-O", "raw", "bs=512", f"skip={DATA_PART_START}",
-                    f"count={size // 512 - DATA_PART_START}", f"if={disk}", f"of={raw}"], check=True)
+    raw = _data_partition_raw(disk, workdir)
     out = subprocess.run(["grep", "-c", "-a", pattern, raw], capture_output=True, text=True).stdout.strip()
     os.unlink(raw)
     return int(out or 0)
+
+
+def luks_state(disk: str, workdir: str) -> str:
+    """LUKS2 header summary of the data partition of a stopped VM disk."""
+    raw = _data_partition_raw(disk, workdir)
+    hdr = os.path.join(workdir, "hdr.bin")
+    subprocess.run(["dd", f"if={raw}", f"of={hdr}", "bs=1M", "count=16", "status=none"], check=True)
+    os.unlink(raw)
+    out = subprocess.run(["cryptsetup", "luksDump", hdr], capture_output=True, text=True)
+    os.unlink(hdr)
+    keep = [l for l in (out.stdout + out.stderr).splitlines()
+            if any(k in l for k in ("Requirements", "Version", "segments", "linear", "crypt", "offset:", "length:", "not a valid"))]
+    return "\n".join(keep[:16])
 
 
 def b64_file_cmd(src: str, dst: str, mode: str) -> str:
@@ -357,7 +376,8 @@ def scenario_migrate(img, keys, workdir):
         done = vm.seen(r"Finished .*HAOS data partition unlock", 1)
         vm.power_cut()
         lines.append(f"- boot 2: unlock/conversion started at {t_start:.0f}s, **power cut** 40 s later "
-                     f"(conversion already finished: {done})")
+                     f"(unlock unit already finished: {done})")
+        lines.append(f"### LUKS2 header right after the power cut (read from the host)\n```\n{luks_state(disk, workdir)}\n```")
         # --- boot 3: resume, then checks
         vm = VM(img, workdir, "migrate-boot3", disk_name="migrate")
         t_login = vm.login(1800)

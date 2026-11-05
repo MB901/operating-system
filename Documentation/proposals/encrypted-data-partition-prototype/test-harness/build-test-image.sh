@@ -67,7 +67,8 @@ else
         usr/lib/systemd/system/haos-data-unlock.service \
         usr/lib/systemd/system/haos-data-crypt-post.service \
         usr/libexec/haos-data-unlock \
-        usr/libexec/haos-expand; do
+        usr/libexec/haos-expand \
+        usr/libexec/haos-wipe; do
         install -D -m "$(stat -c %a "${OVERLAY_SRC}/${f}")" "${OVERLAY_SRC}/${f}" "${WORK}/rootfs/${f}"
     done
     # The release uses lz4hc+lzma with compress hints (BR2_TARGET_ROOTFS_EROFS_*).
